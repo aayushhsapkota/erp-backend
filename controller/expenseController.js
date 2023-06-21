@@ -71,7 +71,7 @@ export const createExpense = async (req, res) => {
   const nepaliDate= new NepaliDate();
   const formattedDate = nepaliDate.format('YYYY-MM-DD');
  
-  const { title, image, category, price, remarks} = req.body;
+  const { title, image, category, amount, remarks} = req.body;
  
   try {
     if (!title) {
@@ -79,16 +79,16 @@ export const createExpense = async (req, res) => {
         message: "Please provide all required fields",
       });
     }
-    if (!price) {
+    if (!amount) {
       return res.status(400).json({
-        message: "Please provide a price",
+        message: "Please provide a amount",
       });
     }
     const expenseData = new expenseModel({
       title,
       image,
       category,
-      amount:price,
+      amount,
       remarks,
       createdDate: formattedDate
     
@@ -112,16 +112,16 @@ export const createExpense = async (req, res) => {
 
 export const updateExpenseById = async (req, res) => {
   const { id } = req.params;
-  const { title, image, category, price, remarks } = req.body;
+  const { title, image, category, amount, remarks } = req.body;
   try {
     if (!title) {
       return res.status(400).json({
         message: "Please provide all required fields",
       });
     }
-    if (!price) {
+    if (!amount) {
       return res.status(400).json({
-        message: "Please provide a price",
+        message: "Please provide a amount",
       });
     }
     const updatedExpense = await expenseModel.findByIdAndUpdate(
@@ -130,7 +130,7 @@ export const updateExpenseById = async (req, res) => {
         title,
         image,
         category,
-        amount:price,
+        amount,
         remarks,
       },
       { new: true }

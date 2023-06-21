@@ -3,7 +3,7 @@ import expenseModel from "../models/expenseModel.js";
 import productModel from "../models/productModel.js";
 import clientModel from "../models/clientModel.js";
 import transactionModel from "../models/allTransactionsModel.js";
-import NepaliDate from 'nepali-date-converter';
+// import NepaliDate from 'nepali-date-converter';
 
 const TIME_RANGES = {
   THIS_WEEK: "thisWeek",
@@ -109,13 +109,11 @@ const getTimeRange = (timeRange, now = new Date()) => {
           message: `Invalid time range provided: ${timeRange}`,
         });
     }
-    // startDay.setHours(0, 0, 0, 0);
-    // endDay.setHours(23, 59, 59, 999);
+    startDay.setHours(0, 0, 0, 0);
+    endDay.setHours(23, 59, 59, 999);
 
-    startDay= new NepaliDate(new Date(startDay)).format('YYYY-MM-DD');
-    endDay= new NepaliDate(new Date(endDay)).format('YYYY-MM-DD');
-
-    console.log(startDay,endDay);
+    // startDay= new NepaliDate(new Date(startDay)).format('YYYY-MM-DD');
+    // endDay= new NepaliDate(new Date(endDay)).format('YYYY-MM-DD');
 
     return { startDay, endDay };
     
@@ -229,7 +227,7 @@ export const getRevenueData = async (req, res) => {
     const data = await expenseModel.aggregate([
         {
             $match:{
-                createdDate: { $gte: startDay, $lte: endDay },
+                createdAt: { $gte: startDay, $lte: endDay },
             }
         },
         {
