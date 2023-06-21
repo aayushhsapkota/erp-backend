@@ -9,6 +9,7 @@ import {
 } from "../controller/clientController.js";
 // import { access } from "../middleware/auth.js";
 const router = express.Router();
+
 router.get("/", getAllClient);
 router.post("/", createClient);
 router.post("/multiple", createMultipleClient);

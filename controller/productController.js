@@ -3,7 +3,6 @@ import { getPaginatedData } from "../Utils/pagination.js";
 import {
   checkProductTransaction,
   createTransaction,
-  deleteTransactionByProductID,
 } from "./transactionController.js";
 
 export const getproductPage = async (req, res) => {
@@ -221,7 +220,7 @@ export const addOrReduceProductQuantity = async (req, res) => {
 
 export const createMultipleProduct = async (req, res) => {
   const { products: ArrayOfProduct, createdDate } = req.body;
-  const lastItemCode = await productModel.find().sort({ itemCode: -1 });
+  const lastItemCode = await productModel.find().sort({ itemCode: -1 }); //The varible name doesnot seem to be convenient
   let lastItemCodeNumber;
   if (lastItemCode.length > 0) {
     lastItemCodeNumber = parseInt(lastItemCode[0].itemCode);
@@ -232,7 +231,7 @@ export const createMultipleProduct = async (req, res) => {
   ArrayOfProduct.forEach((product) => {
     product.itemCode = newItemCode;
     newItemCode++;
-  });
+  }); //upto this point, item code is assigned to every product of the array.
 
   try {
     const savedMultipleProduct = await productModel.insertMany(ArrayOfProduct);
@@ -327,7 +326,7 @@ export const updateProductById = async (req, res) => {
 export const deleteProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    // check of product is in transaction or not
+    // check if product is in transaction or not
     const { message, status } = await checkProductTransaction(id);
     if (status === 400) {
       return res.status(status).json({ message: message });
@@ -378,6 +377,8 @@ export const getfilterProduct = async (req, res) => {
     const categoryCapatalize = categoryFilter.map(
       (item) => item.charAt(0).toUpperCase() + item.slice(1)
     );
+
+    //Set removes dublicates
     const uniqueBrand = [...new Set(brandCapatalize)];
     const uniqueCategory = [...new Set(categoryCapatalize)];
     res.json({

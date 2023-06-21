@@ -19,6 +19,6 @@ router.get("/:id", getInvoice);
 router.patch("/:id", updateInvoice);
 router.delete("/:id", deleteInvoice);
 router.delete("/", deleteAllInvoices);
-router.get("/client/:id", getClientPurchaseHistory);
+router.get("/client/:id", getClientPurchaseHistory); //all invoices specific to that client excluding draft
 
 export default router;

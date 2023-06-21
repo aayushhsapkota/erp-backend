@@ -10,6 +10,7 @@ import InvoiceRoute from "./routes/invoiceRoute.js";
 import PaymentRoute from "./routes/paymentRoute.js";
 import Transactions from "./routes/transactionsRoute.js";
 import ExpenseRoute from "./routes/expenseRoute.js";
+import DashDataRoute from "./routes/dashDataRoute.js";
 
 
 const app = express();
@@ -28,6 +29,8 @@ app.use("/API/invoices", InvoiceRoute);
 app.use("/API/payments", PaymentRoute);
 app.use("/API/transactions", Transactions);
 app.use("/API/expenses", ExpenseRoute);
+app.use("/API/dashData", DashDataRoute);
+
 
 // Route();
 const PORT = process.env.PORT || 5000;

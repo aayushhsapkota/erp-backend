@@ -1,11 +1,8 @@
 import clientModel from "../models/clientModel.js";
 import { getPaginatedData } from "../Utils/pagination.js";
-import { deleteinvoiceByClientID } from "./invoiceController.js";
-import { deletePaymentMethodByClientID } from "./paymentController.js";
 import {
   checkClientTransaction,
   createTransaction,
-  deleteTransactionByClientID,
   updateTransaction,
 } from "./transactionController.js";
 
@@ -104,6 +101,8 @@ export const createClient = async (req, res) => {
     const clientExist = await clientModel.findOne({ name });
     if (clientExist) {
       const clientName = await clientModel.find({ name: { $regex: name } });
+      // const clientName = await clientModel.find({ name: { $regex: name, $options: 'i' } });
+
       name = `${name} ${clientName.length}`;
     }
 

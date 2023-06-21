@@ -18,4 +18,5 @@ router.get("/report/:id", getTransactionsByUserAndReport);
 router.get("/product/:id", getTransactionByProduct);
 router.post("/", createTransaction);
 router.delete("/", deleteAllTransactions);
+
 export default router;

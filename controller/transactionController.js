@@ -23,10 +23,12 @@ export const createTransaction = async (req) => {
     productDetails.forEach((product) => {
       product.quantity = Number(product.quantity);
     });
+    //converting product.quantity in number
   }
   if (partyDetails._id !== null) {
     const client = await clientModel.findById(partyDetails?._id);
     if (client !== null) {
+      //searching if party exists in the transaction or not
       if (transactionType === "Sale" || transactionType === "Purchase") {
         client.totalAmountToPay += amount;
         client.totalAmountToPay -= receviedAmount;
@@ -45,11 +47,12 @@ export const createTransaction = async (req) => {
         client.totalAmountToPay -= amount;
         await client.save();
       } else if (transactionType === "OpeningBalance") {
-        client.totalAmountToPay += amount;
+        client.totalAmountToPay += amount;  
         await client.save();
       }
     }
   }
+  //totalAmounttopay is adjusted
   let NoNullProductDetail = [];
   let newProductDetails = [];
   if (productDetails !== null) {
@@ -57,7 +60,9 @@ export const createTransaction = async (req) => {
       return product.productID !== null && product.productID !== "";
     });
     NoNullProductDetail.forEach(async (product) => {
+      //now the loop begins for NoNullProductDetail which is a collection of products
       const productDetail = await productModel.findById(product.productID);
+      //first the product is retrieved from database and the quantity is adjusted according to transactionTypes
       if (productDetail !== null) {
         if (transactionType === "Sale") {
           if (product.isSecondaryUnitChecked) {
@@ -109,7 +114,7 @@ export const createTransaction = async (req) => {
           await productDetail.save();
         }
       }
-    });
+    }); //loop ends
     newProductDetails = NoNullProductDetail.map((product) => {
       return {
         productID: product.productID,
@@ -164,6 +169,7 @@ export const updateTransaction = async (req) => {
 
   const client = await clientModel.findById(partyDetails._id);
   const transaction = await Transaction.findOne({ transactionNumber });
+  //retrieval of client and transaction
   if (client) {
     let amountDifference = 0;
     if (amount !== transaction.amount) {
@@ -194,13 +200,15 @@ export const updateTransaction = async (req) => {
     }
     await client.save();
   }
+
+
   let newProductDetails = [];
   if (transaction) {
     let NoNullProductDetail = [];
     if (productDetails !== null) {
       NoNullProductDetail = productDetails.filter((product) => {
         return product.productID !== null && product.productID !== "";
-      });
+      }); //the products is being filtered recieved from parameter named productDetails and assiggned to var name NoNullProductDetail.
       if (NoNullProductDetail.length > 0) {
         let productIDs = transaction.productDetails
           ? transaction.productDetails.map(
@@ -208,15 +216,16 @@ export const updateTransaction = async (req) => {
             )
           : [];
         const previousProductIDs = [...productIDs];
+            //these are previous product IDS
         for (let i = 0; i < NoNullProductDetail.length; i++) {
           const product = NoNullProductDetail[i];
-          const isProductIDExist = productIDs.includes(product.productID);
+          const isProductIDExist = productIDs.includes(product.productID); 
           let productDetail = await productModel.findById(product.productID);
           if (!productDetail) {
             return;
           }
           if (!isProductIDExist) {
-            transaction.productDetails.push(productDetail);
+            transaction.productDetails.push(productDetail); //push ta garyo but tyo product ko quantity ko kura??
             if (
               transactionType === "Sale" ||
               transactionType === "PurchasesReturn"
@@ -233,15 +242,14 @@ export const updateTransaction = async (req) => {
                 : product.quantity;
             }
             await productDetail.save();
-          } else {
-            // update existing product details
+          } else { //but if product exists in previous product list 
             const existingProductDetail = transaction.productDetails.find(
-              (p) => p.productID === product.productID
+              (p) => p.productID === product.productID //product means NoNullProductDetail[i];
             );
             let diff = 0;
             if (
               existingProductDetail.isSecondaryUnitChecked !==
-              product.isSecondaryUnitChecked
+              product.isSecondaryUnitChecked //product means NoNullProductDetail[i];
             ) {
               if (existingProductDetail.isSecondaryUnitChecked) {
                 diff =
@@ -335,7 +343,7 @@ export const updateTransaction = async (req) => {
           }
         }
         await transaction.save();
-      } else {
+      } else { // if !== NoNullProductDetail.length > 0
         for (let i = 0; i < transaction.productDetails.length; i++) {
           const productDetail = transaction.productDetails[i];
           const product = await productModel.findById(productDetail.productID);
@@ -555,13 +563,17 @@ export const getTransactionByProduct = async (req, res) => {
     res.status(404).json({ message: error.message });
   }
 };
-export const deleteAllTransactions = async () => {
+
+export const deleteAllTransactions = async (req,res) => {
   try {
     await Transaction.deleteMany({});
+    res.status(200).json({ message: "All transactions deleted successfully." });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: "There was an error deleting the transactions" });
   }
 };
+
 
 export const deleteTransactionByClientID = async (id) => {
   try {
@@ -679,7 +691,7 @@ export const deleteTransactionOfPaymentInOrSales = async (id) => {
   } catch (error) {
     console.log(error);
   }
-}; // no need to open
+};
 
 export const deleteTransactionByProductID = async (id) => {
   try {
@@ -753,11 +765,7 @@ export const deleteTransactionByProductID = async (id) => {
   }
 }; // might not need
 
-const generateToken = (data) => {
-  return jwt.sign({ data }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
+
 
 export const checkProductTransaction = async (id) => {
   const transaction = await Transaction.find({
@@ -804,3 +812,9 @@ export const checkClientTransaction = async (id, merchant) => {
     };
   }
 };
+
+// const generateToken = (data) => {
+//   return jwt.sign({ data }, process.env.JWT_SECRET, {
+//     expiresIn: process.env.JWT_EXPIRES_IN,
+//   });
+// };

@@ -88,7 +88,7 @@ export const createExpense = async (req, res) => {
       title,
       image,
       category,
-      price,
+      amount:price,
       remarks,
       createdDate: formattedDate
     
@@ -130,7 +130,7 @@ export const updateExpenseById = async (req, res) => {
         title,
         image,
         category,
-        price,
+        amount:price,
         remarks,
       },
       { new: true }

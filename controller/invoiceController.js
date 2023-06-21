@@ -13,6 +13,7 @@ export const getInvoices = async (req, res) => {
       const { _id, ...rest } = item._doc;
       return { id: _id, ...rest };
     });
+    //renaming _id to id of every invoice and storing it in detailList variable.
 
     const data = invoice.map((item) => {
       const {
@@ -73,6 +74,7 @@ export const NewInvoiceNo = async (req, res) => {
     res.status(404).json({ message: error.message });
   }
 }; // end of NewInvoiceNo
+
 export const createInvoice = async (req, res) => {
   const invoice = req.body;
   const newInvoice = new invoiceModel(invoice);
@@ -123,7 +125,9 @@ export const updateInvoice = async (req, res) => {
   await updateTransaction(transaction);
   const updatedInvoice = await invoiceModel.findByIdAndUpdate(
     id,
-    { ...invoice, id },
+    // { ...invoice, id },
+    { ...invoice},
+
     { new: true }
   );
   res
@@ -149,6 +153,8 @@ export const getClientPurchaseHistory = async (req, res) => {
       "clientDetail._id": id,
       statusIndex: { $ne: "1" },
     });
+
+    
     const data = invoice.map((item) => {
       const {
         _id,
@@ -199,10 +205,13 @@ export const deleteinvoiceByClientID = async (id) => {
   }
 };
 
-export const deleteAllInvoices = async () => {
+export const deleteAllInvoices = async (req, res) => {
   try {
     await invoiceModel.deleteMany({});
+    res.status(200).json({ message: "All invoices deleted successfully." });
   } catch (error) {
     console.log(error, "error");
+    res.status(500).json({ error: "There was an error deleting the invoices" });
   }
 };
+

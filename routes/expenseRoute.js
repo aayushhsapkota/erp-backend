@@ -9,6 +9,7 @@ import {
 } from "../controller/expenseController.js";
 
 const router = express.Router();
+
 router.get("/", getExpense);
 router.get("/:id", getExpenseById);
 router.get("/filter", getFilterExpense);

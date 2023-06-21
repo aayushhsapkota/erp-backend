@@ -11,6 +11,7 @@ import {
 } from "../controller/productController.js";
 
 const router = express.Router();
+
 router.get("/", getproductPage);
 router.get("/filter", getfilterProduct);
 router.post("/", createproductPage);
