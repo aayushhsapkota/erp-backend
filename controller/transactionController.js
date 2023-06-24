@@ -30,16 +30,22 @@ export const createTransaction = async (req) => {
     if (client !== null) {
       //searching if party exists in the transaction or not
       if (transactionType === "Sale" || transactionType === "Purchase") {
-        client.totalAmountToPay += amount;
-        client.totalAmountToPay -= receviedAmount;
-        await client.save();
+        if(status !=="Draft"){
+          client.totalAmountToPay += amount;
+          client.totalAmountToPay -= receviedAmount;
+          await client.save();
+        } 
+       
       } else if (
         transactionType === "SalesReturn" ||
         transactionType === "PurchasesReturn"
       ) {
-        client.totalAmountToPay -= amount;
-        client.totalAmountToPay += receviedAmount;
-        await client.save();
+        if(status!=="Draft"){
+          client.totalAmountToPay -= amount;
+          client.totalAmountToPay += receviedAmount;
+          await client.save();
+        }
+       
       } else if (
         transactionType === "PaymentIn" ||
         transactionType === "PaymentOut"
@@ -165,50 +171,122 @@ export const updateTransaction = async (req) => {
     productDetails.forEach((product) => {
       product.quantity = Number(product.quantity);
     });
+  } //all the producct's quantity us changedd to integer
+
+  const transaction = await Transaction.findOne({ transactionNumber });
+
+  let newClient = null, oldClient = null;
+  
+  if (partyDetails && partyDetails._id) {
+    newClient = await clientModel.findById(partyDetails._id);
   }
 
-  const client = await clientModel.findById(partyDetails._id);
-  const transaction = await Transaction.findOne({ transactionNumber });
-  //retrieval of client and transaction
-  if (client) {
+  if (transaction && transaction.partyDetails && transaction.partyDetails._id) {
+    oldClient = await clientModel.findById(transaction.partyDetails._id);
+  }
+
+  if (newClient && transaction) {
     let amountDifference = 0;
     if (amount !== transaction.amount) {
       amountDifference = amount - transaction.amount;
     }
 
-    if (transactionType === "Purchase") {
-      client.totalAmountToPay +=
-        amountDifference + transaction.receviedAmount - receviedAmount;
+    switch (transactionType) {
+      case "Purchase":
+      case "Sale":
+        newClient.totalAmountToPay +=
+          amountDifference + transaction.receviedAmount - receviedAmount;
+        break;
+      case "PurchasesReturn":
+      case "SalesReturn":
+        newClient.totalAmountToPay -=
+          amountDifference + transaction.receviedAmount - receviedAmount;
+        break;
+      case "PaymentIn":
+      case "PaymentOut":
+        newClient.totalAmountToPay -= amountDifference;
+        break;
+      case "OpeningBalance":
+        newClient.totalAmountToPay += amountDifference;
+        break;
+      default:
+        break;
     }
-    if (transactionType === "PurchasesReturn") {
-      client.totalAmountToPay -=
-        amountDifference + transaction.receviedAmount - receviedAmount;
-    }
-    if (transactionType === "Sale") {
-      client.totalAmountToPay +=
-        amountDifference + transaction.receviedAmount - receviedAmount;
-    }
-    if (transactionType === "SalesReturn") {
-      client.totalAmountToPay -=
-        amountDifference + transaction.receviedAmount - receviedAmount;
-    }
-    if (transactionType === "PaymentIn" || transactionType === "PaymentOut") {
-      client.totalAmountToPay += -amountDifference;
-    }
-    if (transactionType === "OpeningBalance") {
-      client.totalAmountToPay += amountDifference;
-    }
-    await client.save();
+
+    await newClient.save();
   }
+
+   // Only proceed if oldClient is not the same as newClient, and it exists
+   if (oldClient && (!newClient || newClient._id.toString() !== oldClient._id.toString())&& transaction.status !== 'Draft') {
+    let amountDifference = 0;
+    if (amount !== transaction.amount) {
+      amountDifference = transaction.amount - amount;
+    }
+
+    switch (transactionType) {
+      case "Purchase":
+      case "Sale":
+        oldClient.totalAmountToPay -=
+          amountDifference + transaction.receviedAmount - receviedAmount;
+        break;
+      case "PurchasesReturn":
+      case "SalesReturn":
+        oldClient.totalAmountToPay +=
+          amountDifference + transaction.receviedAmount - receviedAmount;
+        break;
+      case "PaymentIn":
+      case "PaymentOut":
+        oldClient.totalAmountToPay += amountDifference;
+        break;
+      case "OpeningBalance":
+        oldClient.totalAmountToPay -= amountDifference;
+        break;
+      default:
+        break;
+    }
+
+    await oldClient.save();
+  }
+
+  // if (client) {
+  //   let amountDifference = 0;
+  //   if (amount !== transaction.amount) {
+  //     amountDifference = amount - transaction.amount;
+  //   }// difference of previous transaction amount to the updated one
+
+  //   if (transactionType === "Purchase") {
+  //     client.totalAmountToPay +=
+  //       amountDifference + transaction.receviedAmount - receviedAmount;
+  //   }
+  //   if (transactionType === "PurchasesReturn") {
+  //     client.totalAmountToPay -=
+  //       amountDifference + transaction.receviedAmount - receviedAmount;
+  //   }
+  //   if (transactionType === "Sale") {
+  //     client.totalAmountToPay +=
+  //       amountDifference + transaction.receviedAmount - receviedAmount;
+  //   }
+  //   if (transactionType === "SalesReturn") {
+  //     client.totalAmountToPay -=
+  //       amountDifference + transaction.receviedAmount - receviedAmount;
+  //   }
+  //   if (transactionType === "PaymentIn" || transactionType === "PaymentOut") {
+  //     client.totalAmountToPay += -amountDifference;
+  //   }
+  //   if (transactionType === "OpeningBalance") {
+  //     client.totalAmountToPay += amountDifference;
+  //   }
+  //   await client.save();
+  // }
 
 
   let newProductDetails = [];
   if (transaction) {
-    let NoNullProductDetail = [];
+    let NoNullProductDetail = []; 
     if (productDetails !== null) {
       NoNullProductDetail = productDetails.filter((product) => {
         return product.productID !== null && product.productID !== "";
-      }); //the products is being filtered recieved from parameter named productDetails and assiggned to var name NoNullProductDetail.
+      }); //NoNullProductDetail--> New products list.
       if (NoNullProductDetail.length > 0) {
         let productIDs = transaction.productDetails
           ? transaction.productDetails.map(
@@ -670,7 +748,7 @@ export const deleteTransactionOfPaymentInOrSales = async (id) => {
       }
     }
     const client = await clientModel.findById(transaction.partyDetails._id);
-    if (client !== null) {
+    if (client !== null && transaction.status !== "Draft") {
       if (method === "PaymentIn") {
         client.totalAmountToPay += transaction.amount;
       } else if (method === "PaymentOut") {
@@ -782,7 +860,7 @@ export const checkProductTransaction = async (id) => {
       "productDetails.productID": id,
     });
     return {
-      message: "Product Delete Successfully",
+      message: "Product Deleted Successfully",
       status: 200,
     };
   }
@@ -807,7 +885,7 @@ export const checkClientTransaction = async (id, merchant) => {
     return {
       message: `${
         merchant === "true" ? "Merchant" : "Customer"
-      } Delete Successfully`,
+      } Deleted Successfully`,
       status: 200,
     };
   }

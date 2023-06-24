@@ -97,7 +97,8 @@ export const createClient = async (req, res) => {
     if (!openingBalance) {
       openingBalance = 0;
     }
-    // if name already exist
+    //if exactly that name exists with the same case, 1 is added behind that, 
+    //note that making capital doesnot is not done here but is done in frontend
     const clientExist = await clientModel.findOne({ name });
     if (clientExist) {
       const clientName = await clientModel.find({ name: { $regex: name } });
@@ -180,7 +181,7 @@ export const createMultipleClient = async (req, res) => {
     });
     res.status(200).json({
       data: savedMultipleCustomer,
-      message: `${savedMultipleCustomer.length} product created successfully`,
+      message: `${savedMultipleCustomer.length} clients created successfully`,
     });
   } catch (error) {
     console.log(error);

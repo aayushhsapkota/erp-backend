@@ -99,8 +99,10 @@ export const createproductPage = async (req, res) => {
     if (purchasePrice === undefined || purchasePrice === null) {
       purchasePrice = 0;
     }
-    // make title capital
+    // title is capitalized and saved but number is not added behind
     const titleCapital = title.charAt(0).toUpperCase() + title.slice(1);
+
+    //item code increment by 1
     const lastItemCode = await productModel.find().sort({ itemCode: -1 });
     let lastItemCodeNumber;
     if (lastItemCode.length > 0) {
@@ -109,6 +111,9 @@ export const createproductPage = async (req, res) => {
       lastItemCodeNumber = 0;
     }
     const newItemCode = lastItemCodeNumber + 1;
+
+
+
     const productPageData = new productModel({
       itemCode: newItemCode,
       title: titleCapital,
@@ -256,7 +261,7 @@ export const createMultipleProduct = async (req, res) => {
     });
     res.status(200).json({
       data: savedMultipleProduct,
-      message: `${savedMultipleProduct.length} product created successfully`,
+      message: `${savedMultipleProduct.length} products created successfully`,
     });
   } catch (error) {
     res.status(400).json({
