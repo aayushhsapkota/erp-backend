@@ -184,8 +184,10 @@ export const updateTransaction = async (req) => {
   if (transaction && transaction.partyDetails && transaction.partyDetails._id!=="") {
     oldClient = await clientModel.findById(transaction.partyDetails._id);
   }
+ 
 
-  if(newClient && oldClient && newClient._id == oldClient._id){
+
+  if(newClient && oldClient && newClient._id.toString() == oldClient._id.toString()){
     let amountDifference=0;
     if (amount !== transaction.amount) {
       amountDifference = amount - transaction.amount;
@@ -200,6 +202,7 @@ export const updateTransaction = async (req) => {
         }
           newClient.totalAmountToPay +=
           amountDifference + receivedAmountDifference;
+
         break;
       case "PurchasesReturn":
       case "SalesReturn":
