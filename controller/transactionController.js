@@ -177,15 +177,15 @@ export const updateTransaction = async (req) => {
 
   let newClient = null, oldClient = null;
   
-  if (partyDetails && partyDetails._id) {
+  if (partyDetails && partyDetails._id!=="") {
     newClient = await clientModel.findById(partyDetails._id);
   }
 
-  if (transaction && transaction.partyDetails && transaction.partyDetails._id) {
+  if (transaction && transaction.partyDetails && transaction.partyDetails._id!=="") {
     oldClient = await clientModel.findById(transaction.partyDetails._id);
   }
 
-  if(newClient?._id.toString() == oldClient?._id.toString()){
+  if(newClient && oldClient && newClient._id == oldClient._id){
     let amountDifference=0;
     if (amount !== transaction.amount) {
       amountDifference = amount - transaction.amount;
