@@ -185,22 +185,30 @@ export const updateTransaction = async (req) => {
     oldClient = await clientModel.findById(transaction.partyDetails._id);
   }
 
-  if (newClient && transaction) {
-    let amountDifference = 0;
+  if(newClient?._id.toString() == oldClient?._id.toString()){
+    let amountDifference=0;
     if (amount !== transaction.amount) {
       amountDifference = amount - transaction.amount;
     }
-
+    let receivedAmountDifference = transaction.receviedAmount - receviedAmount;
     switch (transactionType) {
       case "Purchase":
       case "Sale":
-        newClient.totalAmountToPay +=
-          amountDifference + transaction.receviedAmount - receviedAmount;
+        if (transaction.status=="Draft"){
+          newClient.totalAmountToPay+= transaction.amount-transaction.receviedAmount;
+          break;
+        }
+          newClient.totalAmountToPay +=
+          amountDifference + receivedAmountDifference;
         break;
       case "PurchasesReturn":
       case "SalesReturn":
+        if (transaction.status=="Draft"){
+          newClient.totalAmountToPay-= transaction.amount-transaction.receviedAmount;
+          break;
+        }
         newClient.totalAmountToPay -=
-          amountDifference + transaction.receviedAmount - receviedAmount;
+          amountDifference + receivedAmountDifference;
         break;
       case "PaymentIn":
       case "PaymentOut":
@@ -212,73 +220,34 @@ export const updateTransaction = async (req) => {
       default:
         break;
     }
-
     await newClient.save();
   }
-
-   // Only proceed if oldClient is not the same as newClient, and it exists
-   if (oldClient && (!newClient || newClient._id.toString() !== oldClient._id.toString())&& transaction.status !== 'Draft') {
-    let amountDifference = 0;
-    if (amount !== transaction.amount) {
-      amountDifference = transaction.amount - amount;
+  else{
+    if (newClient) {
+      switch (transactionType) {
+        case "Purchase":
+        case "Sale":
+          newClient.totalAmountToPay += amount - receviedAmount;
+          break;
+        default:
+          break;
+      }
+      await newClient.save();
     }
-
-    switch (transactionType) {
-      case "Purchase":
-      case "Sale":
-        oldClient.totalAmountToPay -=
-          amountDifference + transaction.receviedAmount - receviedAmount;
-        break;
-      case "PurchasesReturn":
-      case "SalesReturn":
-        oldClient.totalAmountToPay +=
-          amountDifference + transaction.receviedAmount - receviedAmount;
-        break;
-      case "PaymentIn":
-      case "PaymentOut":
-        oldClient.totalAmountToPay += amountDifference;
-        break;
-      case "OpeningBalance":
-        oldClient.totalAmountToPay -= amountDifference;
-        break;
-      default:
-        break;
+  
+      // Only proceed if oldClient is not the same as newClient, it exists, and transaction status isn't "Draft"
+    if (oldClient && transaction.status !== 'Draft') {
+      switch (transactionType) {
+        case "Purchase":
+        case "Sale":
+          oldClient.totalAmountToPay -= transaction.amount-transaction.receviedAmount;
+          break;
+        default:
+          break;
+      }
+      await oldClient.save();
     }
-
-    await oldClient.save();
   }
-
-  // if (client) {
-  //   let amountDifference = 0;
-  //   if (amount !== transaction.amount) {
-  //     amountDifference = amount - transaction.amount;
-  //   }// difference of previous transaction amount to the updated one
-
-  //   if (transactionType === "Purchase") {
-  //     client.totalAmountToPay +=
-  //       amountDifference + transaction.receviedAmount - receviedAmount;
-  //   }
-  //   if (transactionType === "PurchasesReturn") {
-  //     client.totalAmountToPay -=
-  //       amountDifference + transaction.receviedAmount - receviedAmount;
-  //   }
-  //   if (transactionType === "Sale") {
-  //     client.totalAmountToPay +=
-  //       amountDifference + transaction.receviedAmount - receviedAmount;
-  //   }
-  //   if (transactionType === "SalesReturn") {
-  //     client.totalAmountToPay -=
-  //       amountDifference + transaction.receviedAmount - receviedAmount;
-  //   }
-  //   if (transactionType === "PaymentIn" || transactionType === "PaymentOut") {
-  //     client.totalAmountToPay += -amountDifference;
-  //   }
-  //   if (transactionType === "OpeningBalance") {
-  //     client.totalAmountToPay += amountDifference;
-  //   }
-  //   await client.save();
-  // }
-
 
   let newProductDetails = [];
   if (transaction) {
