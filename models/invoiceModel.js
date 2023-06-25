@@ -9,7 +9,7 @@ const InvoiceSchema = mongoose.Schema(
     totalAmount: { type: Number },
     paidAmount: { type: Number },
     dueDate: { type: Date },
-    createdDate: { type: Date },
+    createdDate: { type: String },
     currencyUnit: { type: String },
     clientDetail: { type: Object },
     products: { type: Array },
