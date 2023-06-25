@@ -551,7 +551,10 @@ export const getTransactionsByUserAndReport = async (req, res) => {
     } = req.query;
     const pageNumber = parseInt(page);
     let regexAnything = anything;
-    let OrCondition = [];
+    let oneAndCondition = [{
+      status:{$ne:'Draft'}
+    }];
+    let OrCondition=[];
     if (regexAnything) {
       regexAnything = new RegExp(anything, "i");
       OrCondition = [
@@ -571,6 +574,7 @@ export const getTransactionsByUserAndReport = async (req, res) => {
       limit: 100,
       modelName: Transaction,
       inside: OrCondition,
+      oneAndCondition,
       mainSearch: { name: "partyDetails._id", value: id },
       startDate: startDate ? new Date(startDate) : "",
       endDate: endDate ? new Date(endDate) : "",
@@ -590,7 +594,8 @@ export const getTransactionByUser = async (req, res) => {
       page: page,
       limit: 200,
       modelName: Transaction,
-      inside: [{ "partyDetails._id": id }, {"Status":{$ne:'Draft'}}],
+      oneAndCondition:[{status:{$ne:'Draft'}}],
+      inside: [{ "partyDetails._id": id }],
     });
     res.status(200).json({ data: data, pageCount: pageCount });
   } catch (error) {
