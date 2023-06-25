@@ -238,7 +238,7 @@ export const updateTransaction = async (req) => {
       await newClient.save();
     }
   
-      // Only proceed if oldClient is not the same as newClient, it exists, and transaction status isn't "Draft"
+      // Only proceed if it exists, and transaction status isn't "Draft"
     if (oldClient && transaction.status !== 'Draft') {
       switch (transactionType) {
         case "Purchase":
@@ -590,7 +590,7 @@ export const getTransactionByUser = async (req, res) => {
       page: page,
       limit: 200,
       modelName: Transaction,
-      inside: [{ "partyDetails._id": id }],
+      inside: [{ "partyDetails._id": id }, {"status":{$ne:'Draft'}}],
     });
     res.status(200).json({ data: data, pageCount: pageCount });
   } catch (error) {
