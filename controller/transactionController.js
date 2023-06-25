@@ -197,7 +197,7 @@ export const updateTransaction = async (req) => {
       case "Purchase":
       case "Sale":
         if (transaction.status=="Draft"){
-          newClient.totalAmountToPay+= transaction.amount-transaction.receviedAmount;
+          newClient.totalAmountToPay+= amount-receviedAmount;
           break;
         }
           newClient.totalAmountToPay +=
@@ -207,7 +207,7 @@ export const updateTransaction = async (req) => {
       case "PurchasesReturn":
       case "SalesReturn":
         if (transaction.status=="Draft"){
-          newClient.totalAmountToPay-= transaction.amount-transaction.receviedAmount;
+          newClient.totalAmountToPay-= amount-receviedAmount;
           break;
         }
         newClient.totalAmountToPay -=
