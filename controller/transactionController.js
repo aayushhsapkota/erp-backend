@@ -590,7 +590,7 @@ export const getTransactionByUser = async (req, res) => {
       page: page,
       limit: 200,
       modelName: Transaction,
-      inside: [{ "partyDetails._id": id }, {"status":{$ne:'Draft'}}],
+      inside: [{ "partyDetails._id": id }, {"Status":{$ne:'Draft'}}],
     });
     res.status(200).json({ data: data, pageCount: pageCount });
   } catch (error) {
