@@ -236,6 +236,8 @@ export const createMultipleProduct = async (req, res) => {
   ArrayOfProduct.forEach((product) => {
     product.itemCode = newItemCode;
     newItemCode++;
+    product.title = product.title.charAt(0).toUpperCase() + product.title.slice(1);
+
   }); //upto this point, item code is assigned to every product of the array.
 
   try {

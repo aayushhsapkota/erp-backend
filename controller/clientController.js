@@ -97,18 +97,29 @@ export const createClient = async (req, res) => {
     if (!openingBalance) {
       openingBalance = 0;
     }
-    //if exactly that name exists with the same case, 1 is added behind that, 
-    //note that making capital doesnot is not done here but is done in frontend
-    const clientExist = await clientModel.findOne({ name });
-    if (clientExist) {
-      const clientName = await clientModel.find({ name: { $regex: name } });
-      // const clientName = await clientModel.find({ name: { $regex: name, $options: 'i' } });
 
-      name = `${name} ${clientName.length}`;
+    var fullName = name.split(" ");
+    var firstName = fullName[0];
+    var lastName = fullName[1];
+
+    var capitalFirstName =
+      firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    var capitalLastName =
+      lastName.charAt(0).toUpperCase() + lastName.slice(1);
+    var finalName = capitalFirstName + " " + capitalLastName;
+
+    //if exactly that name exists with the same case, 2 is added behind that,
+
+    const clientName = await clientModel.find({
+      name: { $regex: finalName },
+    });
+    console.log(clientName);
+    if (clientName && clientName.length > 0) {
+      finalName = `${finalName} ${clientName.length + 1}`;
     }
 
     const clientData = new clientModel({
-      name,
+      name: finalName,
       email,
       mobileNo,
       billingAddress,
@@ -158,6 +169,16 @@ export const createMultipleClient = async (req, res) => {
         client.openingBalance = 0;
       }
       client.totalAmountToPay = parseInt(client.openingBalance);
+      //making name capital
+      var fullName = client.name.split(" ");
+      var firstName = fullName[0];
+      var lastName = fullName[1];
+  
+      var capitalFirstName =
+        firstName.charAt(0).toUpperCase() + firstName.slice(1);
+      var capitalLastName =
+        lastName.charAt(0).toUpperCase() + lastName.slice(1);
+      client.name = capitalFirstName + " " + capitalLastName;
     });
     const savedMultipleCustomer = await clientModel.insertMany(ArrayOfClient);
     savedMultipleCustomer.forEach(async (clientData) => {

@@ -84,8 +84,9 @@ export const createExpense = async (req, res) => {
         message: "Please provide a amount",
       });
     }
+    const titleCapital = title.charAt(0).toUpperCase() + title.slice(1);
     const expenseData = new expenseModel({
-      title,
+      title:titleCapital,
       image,
       category,
       amount,

@@ -15,10 +15,26 @@ export const createTransaction = async (req) => {
     receviedAmount,
     createdDate,
     status,
-    amount,
+    amount,   
     note,
     billNumber,
   } = req;
+
+//   console.log("id"+partyDetails.id);
+//   console.log("_id"+partyDetails._id);
+
+//   if (typeof partyDetails.id === 'string') {
+//     console.log('Id is a string');
+// } else {
+//     console.log('The variable is not a string');
+// }
+
+// if (typeof partyDetails._id === 'string') {
+//   console.log('_Id is a string');
+// } else {
+//   console.log('The variable is not a string');
+// }
+
   if (productDetails !== null) {
     productDetails.forEach((product) => {
       product.quantity = Number(product.quantity);
@@ -176,12 +192,27 @@ export const updateTransaction = async (req) => {
   const transaction = await Transaction.findOne({ transactionNumber });
 
   let newClient = null, oldClient = null;
+
+//   console.log("id"+partyDetails.id);
+//   console.log("_id"+partyDetails._id);
+
+//   if (typeof partyDetails.id === 'string') {
+//     console.log('Id is a string');
+// } else {
+//     console.log('The variable is not a string');
+// }
+
+// if (typeof partyDetails._id === 'string') {
+//   console.log('_Id is a string');
+// } else {
+//   console.log('The variable is not a string');
+// }
   
-  if (partyDetails && partyDetails._id!=="") {
+  if (partyDetails && partyDetails._id) {
     newClient = await clientModel.findById(partyDetails._id);
   }
 
-  if (transaction && transaction.partyDetails && transaction.partyDetails._id!=="") {
+  if (transaction && transaction.partyDetails && transaction.partyDetails._id) {
     oldClient = await clientModel.findById(transaction.partyDetails._id);
   }
  
@@ -531,8 +562,10 @@ export const getTransactions = async (req, res) => {
         : "",
       filterBy: filterBy ? { name: "transactionType", value: filterBy } : "",
       sortBy: sort,
-      startDate: startDate ? new Date(startDate) : "",
-      endDate: endDate ? new Date(endDate) : "",
+      // startDate: startDate ? new Date(startDate) : "",
+      // endDate: endDate ? new Date(endDate) : "",
+      startDate: startDate,
+      endDate: endDate,
     });
     res.status(200).json({ data, pageCount });
   } catch (error) {
@@ -576,8 +609,8 @@ export const getTransactionsByUserAndReport = async (req, res) => {
       inside: OrCondition,
       oneAndCondition,
       mainSearch: { name: "partyDetails._id", value: id },
-      startDate: startDate ? new Date(startDate) : "",
-      endDate: endDate ? new Date(endDate) : "",
+      startDate: startDate,
+      endDate: endDate,
     });
     res.status(200).json({ data, pageCount });
   } catch (error) {

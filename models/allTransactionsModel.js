@@ -12,7 +12,8 @@ const TransactionSchema = mongoose.Schema(
     totalAmountToPay: { type: Number },
     note: { type: String },
     billNumber: { type: String },
-    createdDate: { type: Date, default: Date.now },
+    createdDate: { type: String},
+    // createdDate: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

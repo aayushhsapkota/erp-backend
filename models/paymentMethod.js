@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const PaymentMethodSchema = mongoose.Schema(
   {
     paymentType: { type: String },
-    paymentDate: { type: Date, default: Date.now },
+    paymentDate: { type: String },
     paymentNumber: { type: String },
     partyDetails: { type: Object },
     amount: { type: Number },
