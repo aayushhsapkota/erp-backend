@@ -100,13 +100,19 @@ export const createClient = async (req, res) => {
 
     var fullName = name.split(" ");
     var firstName = fullName[0];
-    var lastName = fullName[1];
+    var middleName = fullName[1];
+    var lastName=fullName[2];
+    
 
     var capitalFirstName =
       firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+      var capitalMiddleName =
+      middleName.charAt(0).toUpperCase() + middleName.slice(1);
+
     var capitalLastName =
       lastName.charAt(0).toUpperCase() + lastName.slice(1);
-    var finalName = capitalFirstName + " " + capitalLastName;
+    var finalName = capitalFirstName + " " + capitalMiddleName+ " "+ capitalLastName;
 
     //if exactly that name exists with the same case, 2 is added behind that,
 
