@@ -10,6 +10,9 @@ import {
   addOrReduceProductQuantity,
 } from "../controller/productController.js";
 
+// import {auth, checkAdmin} from "../middleware/auth.js";
+
+
 const router = express.Router();
 
 router.get("/", getproductPage);

@@ -6,6 +6,9 @@ import {
   deltePaymentMethod,
 } from "../controller/paymentController.js";
 
+// import {auth, checkAdmin} from "../middleware/auth.js";
+
+
 const router = express.Router();
 
 router.post("/", createPayment);

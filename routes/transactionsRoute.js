@@ -8,7 +8,9 @@ import {
   deleteAllTransactions,
   getTransactionByProduct,
 } from "../controller/transactionController.js";
-// import { access } from "../middleware/auth.js";
+
+// import {auth, checkAdmin} from "../middleware/auth.js";
+
 
 const router = express.Router();
 

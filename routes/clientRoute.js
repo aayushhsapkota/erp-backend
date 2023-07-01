@@ -7,7 +7,9 @@ import {
   updateClient,
   getClientById,
 } from "../controller/clientController.js";
-// import { access } from "../middleware/auth.js";
+
+// import {auth, checkAdmin} from "../middleware/auth.js";
+
 const router = express.Router();
 
 router.get("/", getAllClient);
