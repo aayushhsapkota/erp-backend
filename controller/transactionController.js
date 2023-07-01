@@ -82,7 +82,7 @@ export const createTransaction = async (req) => {
       return product.productID !== null && product.productID !== "";
     });
     NoNullProductDetail.forEach(async (product) => {
-      //now the loop begins for NoNullProductDetail which is a collection of products
+      //now the loop begins for NoNullProductDetail which is a collection of products coming from frontend
       const productDetail = await productModel.findById(product.productID);
       //first the product is retrieved from database and the quantity is adjusted according to transactionTypes
       if (productDetail !== null) {
@@ -300,7 +300,7 @@ export const updateTransaction = async (req) => {
             //these are previous product IDS
         for (let i = 0; i < NoNullProductDetail.length; i++) {
           const product = NoNullProductDetail[i];
-          const isProductIDExist = productIDs.includes(product.productID); 
+          const isProductIDExist = productIDs.includes(product.productID); //making sure the new product exist in the previous products list
           let productDetail = await productModel.findById(product.productID);
           if (!productDetail) {
             return;
@@ -424,7 +424,7 @@ export const updateTransaction = async (req) => {
           }
         }
         await transaction.save();
-      } else { // if !== NoNullProductDetail.length > 0
+      } else { // if NoNullProductDetail.length = 0
         for (let i = 0; i < transaction.productDetails.length; i++) {
           const productDetail = transaction.productDetails[i];
           const product = await productModel.findById(productDetail.productID);
