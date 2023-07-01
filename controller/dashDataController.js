@@ -298,8 +298,6 @@ export const getRevenueByCategory = async (req, res) => {
     }
   
     const { startDay, endDay } = getTimeRange(timeRange);
-    console.log(startDay);
-    console.log(endDay);
   
     try {
       const salesData = await invoiceModel.aggregate([
@@ -359,6 +357,9 @@ export const getRevenueByCategory = async (req, res) => {
           netRevenue: salesItem.totalSold - totalReturned,
         };
       });
+
+      // Filter out items with null category
+      data = data.filter((item) => item.category !== null);
   
       // No data found
       if (!data.length) {
