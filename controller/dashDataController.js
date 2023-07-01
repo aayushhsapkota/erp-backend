@@ -14,6 +14,15 @@ const TIME_RANGES = {
   LAST_YEAR: "lastYear",
 };
 
+const LENGTHS = {
+  [TIME_RANGES.THIS_WEEK]: 7,
+  [TIME_RANGES.LAST_WEEK]: 7,
+  [TIME_RANGES.THIS_MONTH]: 5,
+  [TIME_RANGES.LAST_MONTH]: 5,
+  [TIME_RANGES.THIS_YEAR]: 4,
+  [TIME_RANGES.LAST_YEAR]: 4,
+};
+
 const groupByPeriod = {
   [TIME_RANGES.THIS_WEEK]: { $dayOfWeek: "$createdAt" },
   [TIME_RANGES.LAST_WEEK]: { $dayOfWeek: "$createdAt" },
@@ -193,7 +202,7 @@ export const getRevenueData = async (req, res) => {
         }
 
           // Create a default array for all weeks
-          let result = Array.from({ length: 5 }, (_, i) => ({
+          let result = Array.from({ length: LENGTHS[timeRange] }, (_, i) => ({
             _id: i + 1,
             totalSales: 0,
             totalMoneyReceived: 0
@@ -201,8 +210,8 @@ export const getRevenueData = async (req, res) => {
   
           // Update the result array with actual data
           for(let item of data) {
-            const weekIndex = item._id - 1;
-            result[weekIndex] = item;
+            const periodIndex = item._id - 1;
+            result[periodIndex] = item;
           }
   
         // Send the data
