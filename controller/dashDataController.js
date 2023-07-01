@@ -359,10 +359,10 @@ export const getRevenueByCategory = async (req, res) => {
       });
 
       // Filter out items with null category
-      data = data.filter((item) => item.category !== null);
+      finalData = data.filter((item) => item.category !== null);
   
       // No data found
-      if (!data.length) {
+      if (!finalData.length) {
         return res.status(404).json({
           success: false,
           message: `No data found for ${timeRange}`,
@@ -372,7 +372,7 @@ export const getRevenueByCategory = async (req, res) => {
       // Send the data
       return res.status(200).json({
         success: true,
-        data,
+        finalData,
       });
     } catch (error) {
       // Catch any error
