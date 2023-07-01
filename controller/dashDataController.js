@@ -191,11 +191,24 @@ export const getRevenueData = async (req, res) => {
                 message: `No data found for ${timeRange}`
             });
         }
+
+          // Create a default array for all weeks
+          let result = Array.from({ length: 5 }, (_, i) => ({
+            _id: i + 1,
+            totalSales: 0,
+            totalMoneyReceived: 0
+          }));
+  
+          // Update the result array with actual data
+          for(let item of data) {
+            const weekIndex = item._id - 1;
+            result[weekIndex] = item;
+          }
   
         // Send the data
         return res.status(200).json({
             success: true,
-            data,
+            data:result,
             totalSales: totalData.length?totalData[0].totalSales:0,
             totalReturned: totalReturnedData.length ? totalReturnedData[0].totalReturned : 0
         });
