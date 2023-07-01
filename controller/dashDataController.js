@@ -359,7 +359,7 @@ export const getRevenueByCategory = async (req, res) => {
       });
 
       // Filter out items with null category
-      finalData = data.filter((item) => item.category !== null);
+      const finalData = data.filter((item) => item.category !== null);
   
       // No data found
       if (!finalData.length) {
