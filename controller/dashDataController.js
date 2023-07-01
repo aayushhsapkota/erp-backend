@@ -631,7 +631,11 @@ export const getCashFlowData = async (req, res) => {
       existingMonth.cashIn = existingMonth.cashIn || curr.cashIn;
       existingMonth.cashOut = existingMonth.cashOut || curr.cashOut;
     } else {
-      acc.push(curr);
+      acc.push({
+        _id: curr._id,
+        cashIn: curr.cashIn || 0,
+        cashOut: curr.cashOut || 0,
+      });
     }
     return acc;
   }, []);
