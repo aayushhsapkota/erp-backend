@@ -625,7 +625,7 @@ export const getCashFlowData = async (req, res) => {
     cashOutData.sort((a, b) => a._id - b._id);
 
    // Merge cashInData and cashOutData
-  const cashFlowData = [...cashInData, ...cashOutData].reduce((acc, curr) => {
+  let cashFlowData = [...cashInData, ...cashOutData].reduce((acc, curr) => {
     const existingMonth = acc.find(item => item._id === curr._id);
     if (existingMonth) {
       existingMonth.cashIn = existingMonth.cashIn || curr.cashIn;
@@ -635,6 +635,14 @@ export const getCashFlowData = async (req, res) => {
     }
     return acc;
   }, []);
+
+ // Fill in missing months
+ for (let m = fiveMonthsAgo.getMonth(); m <= now.getMonth(); m++) {
+  const existingMonth = cashFlowData.find(item => item._id === (m+1));
+  if (!existingMonth) {
+    cashFlowData.push({ _id: m+1, cashIn: 0, cashOut: 0 });
+  }
+}
 
   // Sort the array by month
   cashFlowData.sort((a, b) => a._id - b._id);
