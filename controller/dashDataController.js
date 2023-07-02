@@ -192,14 +192,6 @@ export const getRevenueData = async (req, res) => {
             }
         }
     ]);
-  
-        // No data found
-        if (!data.length) {
-            return res.status(404).json({
-                success: false,
-                message: `No data found for ${timeRange}`
-            });
-        }
 
           // Create a default array for all weeks
           let result = Array.from({ length: LENGTHS[timeRange] }, (_, i) => ({
@@ -213,6 +205,14 @@ export const getRevenueData = async (req, res) => {
             const periodIndex = item._id - 1;
             result[periodIndex] = item;
           }
+
+            // No data found
+        if (!data.length) {
+          return res.status(404).json({
+              success: false,
+              message: `No data found for ${timeRange}`
+          });
+      }
   
         // Send the data
         return res.status(200).json({
