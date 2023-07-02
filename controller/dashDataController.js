@@ -199,20 +199,16 @@ export const getRevenueData = async (req, res) => {
             totalSales: 0,
             totalMoneyReceived: 0
           }));
-  
-          // Update the result array with actual data
-          for(let item of data) {
-            const periodIndex = item._id - 1;
-            result[periodIndex] = item;
-          }
 
-            // No data found
-        if (!data.length) {
-          return res.status(404).json({
-              success: false,
-              message: `No data found for ${timeRange}`
-          });
-      }
+          
+        if (data.length !==0) {
+             // Update the result array with actual data
+             for(let item of data) {
+              const periodIndex = item._id - 1;
+              result[periodIndex] = item;
+            }
+  
+          };   
   
         // Send the data
         return res.status(200).json({
