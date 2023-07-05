@@ -3,6 +3,7 @@ import expenseModel from "../models/expenseModel.js";
 import productModel from "../models/productModel.js";
 import clientModel from "../models/clientModel.js";
 import transactionModel from "../models/allTransactionsModel.js";
+import { response } from "express";
 // import NepaliDate from 'nepali-date-converter';
 
 const TIME_RANGES = {
@@ -229,7 +230,6 @@ export const getRevenueData = async (req, res) => {
   }
 
   export const getExpenseData = async (req, res) => {
-    console.log("reached");
     const { timeRange } = req.query;
 
     if(!timeRange || !Object.values(TIME_RANGES).includes(timeRange)) {
@@ -267,10 +267,26 @@ export const getRevenueData = async (req, res) => {
         });
     }
 
+    const totalExpenseData = await expenseModel.aggregate([
+      {
+          $match:{
+              createdAt: { $gte: startDay, $lte: endDay },
+          }
+      },
+      {
+          $group: {
+              _id: null,
+              totalExpense: { $sum: '$amount' },
+          }
+      }
+  ]);
+
     // Send the data
     return res.status(200).json({
         success: true,
-        data
+        data,
+        totalExpenseData: totalExpenseData.length?totalExpenseData[0].totalExpense:0,
+
     });
 
 } catch (error) {
@@ -349,13 +365,13 @@ export const getRevenueByCategory = async (req, res) => {
         );
         const totalReturned = returnItem ? returnItem.totalReturned : 0;
         return {
-          category: salesItem._id,
+          name: salesItem._id,
           netRevenue: salesItem.totalSold - totalReturned,
         };
       });
 
       // Filter out items with null category
-      const finalData = data.filter((item) => item.category !== null);
+      const finalData = data.filter((item) => item.name !== null);
   
       // No data found
       if (!finalData.length) {
@@ -364,11 +380,47 @@ export const getRevenueByCategory = async (req, res) => {
           message: `No data found for ${timeRange}`,
         });
       }
+
+          // Aggregation to calculate total amount for invoices of type "Sales"
+      const totalData = await invoiceModel.aggregate([
+        {
+            $match:{
+                createdAt: { $gte: startDay, $lte: endDay },
+                invoiceType: 'Sale'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalSales: { $sum: '$totalAmount' },
+            }
+        }
+    ]);
+
+    // Aggregation to calculate total returned amount for invoices of type "SalesReturn"
+    const totalReturnedData = await invoiceModel.aggregate([
+      {
+          $match:{
+              createdAt: { $gte: startDay, $lte: endDay },
+              invoiceType: 'SalesReturn'
+          }
+      },
+      {
+          $group: {
+              _id: null,
+              totalReturned: { $sum: '$totalAmount' },
+          }
+      }
+  ]);
+
+  const totalSales=totalData.length?totalData[0].totalSales:0;
+  const totalReturned=totalReturnedData.length ? totalReturnedData[0].totalReturned : 0;
   
       // Send the data
       return res.status(200).json({
         success: true,
         finalData,
+        totalRevenue:totalSales-totalReturned,
       });
     } catch (error) {
       // Catch any error
@@ -383,12 +435,25 @@ export const getRevenueByCategory = async (req, res) => {
 
 export const getStockData = async (req, res) => {
   try {
-
+    console.log("reached-stock");
     const data = await productModel.aggregate([
       {
         $group: {
           _id: "$category",
           totalStock: {
+            $sum: {
+              $multiply: ["$quantity", "$price"]
+            }
+          }
+        }
+      }
+    ]);
+
+    const totalStock = await productModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalValue: {
             $sum: {
               $multiply: ["$quantity", "$price"]
             }
@@ -409,7 +474,8 @@ export const getStockData = async (req, res) => {
     // Send the data
     return res.status(200).json({
         success: true,
-        data
+        data,
+        totalStock: totalStock.length?totalStock[0].totalValue:0,
     });
 
 } catch (error) {
@@ -507,15 +573,17 @@ const totalPurchaseReturnData = await invoiceModel.aggregate([
   }
 ]);
 
-
+const sales=totalSalesData[0]?.totalSales||0;
+const purchase=totalPurchaseData[0]?.totalPurchase||0;
+const salesReturn=totalSalesReturnData[0]?.totalSalesReturn||0;
+const purchaseReturn=totalPurchaseReturnData[0]?.totalPurchaseReturn||0;
 
         return res.status(200).json({
           success: true,
           totalReceivables:receivablesData.length? receivablesData[0].receivables:0,
           totalPayables: payablesData.length?payablesData[0].payables:0,
-          totalSales: totalSalesData[0]?.totalSales - totalSalesReturnData[0]?.totalSalesReturn || 0,
-          totalPurchase:totalPurchaseData[0]?.totalPurchase - totalPurchaseReturnData[0]?.totalPurchaseReturn || 0
-          
+          totalSales: sales-salesReturn,
+          totalPurchase:purchase-purchaseReturn
       });
   } catch (error) {
     console.error(error);
