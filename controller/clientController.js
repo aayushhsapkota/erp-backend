@@ -100,7 +100,17 @@ export const createClient = async (req, res) => {
 
     var fullName = name.split(" ");
     var firstName = fullName[0];
-    var middleName = fullName[1];
+    var capitalFirstName =
+      firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+    if(fullName.length>1){
+      var middleName = fullName[1];
+      var capitalMiddleName =
+      middleName.charAt(0).toUpperCase() + middleName.slice(1);
+    }  else{
+      var capitalMiddleName="";
+    }
+    
 
     if(fullName.length>2){
       var lastName=fullName[2];
@@ -109,13 +119,6 @@ export const createClient = async (req, res) => {
     } else{
       var capitalLastName="";
     }
-    
-
-    var capitalFirstName =
-      firstName.charAt(0).toUpperCase() + firstName.slice(1);
-
-      var capitalMiddleName =
-      middleName.charAt(0).toUpperCase() + middleName.slice(1);
 
       var finalName = capitalFirstName + " " + capitalMiddleName+ " "+ capitalLastName;
     
@@ -125,7 +128,6 @@ export const createClient = async (req, res) => {
     const clientName = await clientModel.find({
       name: { $regex: finalName },
     });
-    console.log(clientName);
     if (clientName && clientName.length > 0) {
       finalName = `${finalName} ${clientName.length + 1}`;
     }
@@ -167,9 +169,11 @@ export const createClient = async (req, res) => {
       message: `Client ${name} created successfully`,
     });
   } catch (error) {
+    console.log(error.message);
     res.json({
       message: error.message,
     });
+
   }
 };
 
