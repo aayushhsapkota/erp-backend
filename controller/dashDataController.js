@@ -545,6 +545,20 @@ const totalSalesReturnData = await invoiceModel.aggregate([
   }
 ]);
 
+const customerOpeningBalance = await clientModel.aggregate([
+  {
+      $match: {
+          clientType: 'Customer'
+      }
+  },
+  {
+      $group: {
+          _id: null,
+          totalOpenings: { $sum: '$openingBalance' },
+      }
+  }
+]);
+
 const totalPurchaseData = await invoiceModel.aggregate([
   {
     $match: {
@@ -573,17 +587,34 @@ const totalPurchaseReturnData = await invoiceModel.aggregate([
   }
 ]);
 
+const merchantOpeningBalance = await clientModel.aggregate([
+  {
+      $match: {
+          clientType: 'Merchant'
+      }
+  },
+  {
+      $group: {
+          _id: null,
+          totalOpenings: { $sum: '$openingBalance' },
+      }
+  }
+]);
+
 const sales=totalSalesData[0]?.totalSales||0;
 const purchase=totalPurchaseData[0]?.totalPurchase||0;
 const salesReturn=totalSalesReturnData[0]?.totalSalesReturn||0;
 const purchaseReturn=totalPurchaseReturnData[0]?.totalPurchaseReturn||0;
 
+const customerOpenings=customerOpeningBalance[0]?.totalOpenings||0;
+const merchantOpenings=merchantOpeningBalance[0]?.totalOpenings||0;
+
         return res.status(200).json({
           success: true,
           totalReceivables:receivablesData.length? receivablesData[0].receivables:0,
           totalPayables: payablesData.length?payablesData[0].payables:0,
-          totalSales: sales-salesReturn,
-          totalPurchase:purchase-purchaseReturn
+          totalSales: sales-salesReturn+customerOpenings,//look how customerOpenings is added to totalSales 
+          totalPurchase:purchase-purchaseReturn+merchantOpenings//look how merchantOpenings is added to totalPurchase 
       });
   } catch (error) {
     console.error(error);

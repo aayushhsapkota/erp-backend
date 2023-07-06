@@ -76,12 +76,13 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    //creating userModel with hashed password using bcrypt
     const result = await userModel.create({
       email,
       password: hashedPassword,
       name: `${firstName} ${lastName}`,
     });
-
+  //generating and sending back token
     const token = jwt.sign(
       { email: result.email, id: result._id, isAdmin: result.isAdmin },
       signatureKey,
