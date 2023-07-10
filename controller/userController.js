@@ -6,18 +6,18 @@ import userModel from "../models/userModel.js";
 const signatureKey = "mySecretKey";
 
 export const signin = async (req, res) => {
-  const { email, password } = req.body;
+  const { userName, password } = req.body;
 
   try {
-    if (!email) {
-      return res.status(400).json({ message: "Please enter email." });
+    if (!userName) {
+      return res.status(400).json({ message: "Please enter username." });
     }
 
     if (!password) {
       return res.status(400).json({ message: "Please enter password." });
     }
 
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await userModel.findOne({ userName });
     if (!existingUser)
       return res.status(404).json({ message: "User doesn't exist" });
 
@@ -30,7 +30,7 @@ export const signin = async (req, res) => {
 
     const token = jwt.sign(
       {
-        email: existingUser.email,
+        userName: existingUser.userName,
         id: existingUser._id,
         isAdmin: existingUser.isAdmin,
       },
@@ -46,11 +46,11 @@ export const signin = async (req, res) => {
 
 export const signup = async (req, res) => {
   //this is done by admin.
-  const { email, password, confirmPassword, firstName, lastName } = req.body;
+  const { userName, password, confirmPassword, firstName, lastName } = req.body;
 
   try {
-    if (!email) {
-        return res.status(400).json({ message: "Please enter email." });
+    if (!userName) {
+        return res.status(400).json({ message: "Please enter username." });
       }
   
       if (!password) {
@@ -67,7 +67,7 @@ export const signup = async (req, res) => {
         return res.status(400).json({ message: "Please enter your last name." });
       }
 
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await userModel.findOne({ userName });
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
@@ -78,13 +78,13 @@ export const signup = async (req, res) => {
 
     //creating userModel with hashed password using bcrypt
     const result = await userModel.create({
-      email,
+      userName,
       password: hashedPassword,
       name: `${firstName} ${lastName}`,
     });
   //generating and sending back token
     const token = jwt.sign(
-      { email: result.email, id: result._id, isAdmin: result.isAdmin },
+      { userName: result.userName, id: result._id, isAdmin: result.isAdmin },
       signatureKey,
       { expiresIn: "1h" }
     );
