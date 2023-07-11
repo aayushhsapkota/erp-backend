@@ -8,7 +8,6 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: "Missing authorization headers" });
     }
     const token = req.headers.authorization.split(" ")[1];
-    
     const decodedData = jwt.verify(token, signatureKey);// jwt secret is here
     //injects this attributes in request after decoding token
     req.userId = decodedData?.id;

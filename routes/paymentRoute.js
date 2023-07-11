@@ -6,13 +6,13 @@ import {
   deltePaymentMethod,
 } from "../controller/paymentController.js";
 
-// import {auth, checkAdmin} from "../middleware/auth.js";
+import {auth, checkAdmin} from "../middleware/auth.js";
 
 
 const router = express.Router();
 
-router.post("/", createPayment);
-router.patch("/:id", updatedPayment);
-router.delete("/:id", deltePaymentMethod);
+router.post("/",auth, createPayment);
+router.patch("/:id",auth, updatedPayment);
+router.delete("/:id",auth,checkAdmin, deltePaymentMethod);
 
 export default router;
