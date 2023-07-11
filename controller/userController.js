@@ -6,6 +6,7 @@ import userModel from "../models/userModel.js";
 const signatureKey = "mySecretKey";
 
 export const signin = async (req, res) => {
+
   const { userName, password } = req.body;
 
   try {
@@ -19,14 +20,15 @@ export const signin = async (req, res) => {
 
     const existingUser = await userModel.findOne({ userName });
     if (!existingUser)
-      return res.status(404).json({ message: "User doesn't exist" });
+      return res.status(404).json({ message: "Invalid Credentials!!" });
+
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingUser.password
     );
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Invalid Credentials!!" });
 
     const token = jwt.sign(
       {
@@ -38,7 +40,8 @@ export const signin = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ result: existingUser, token });
+
+    res.status(200).json({token });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong" });
   }
