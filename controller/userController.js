@@ -18,7 +18,8 @@ export const signin = async (req, res) => {
       return res.status(400).json({ message: "Please enter password." });
     }
 
-    const existingUser = await userModel.findOne({ userName });
+    const existingUser = await userModel.findOne({ userName: userName.toLowerCase() });
+
     if (!existingUser)
       return res.status(404).json({ message: "Invalid Credentials!!" });
 
