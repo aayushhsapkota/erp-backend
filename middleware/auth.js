@@ -5,7 +5,7 @@ const signatureKey="mySecretKey";
 const auth = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
-      return res.status(401).json({ message: "Missing authorization headers" });
+      return res.status(401).json({ message: "Login to continue." });
     }
     const token = req.headers.authorization.split(" ")[1];
     const decodedData = jwt.verify(token, signatureKey);// jwt secret is here
@@ -14,7 +14,7 @@ const auth = async (req, res, next) => {
     req.isAdmin = decodedData?.isAdmin;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Login to continue" });
+    res.status(401).json({ message: "Please login to continue." });
   }
 };
 
