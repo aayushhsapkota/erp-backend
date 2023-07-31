@@ -35,7 +35,7 @@ app.use("/API/users", UserRoute);
 
 
 // Route();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 80;
 mongoose.set("strictQuery", false);
 mongoose
   .connect(process.env.CONNECTION_URL, {
