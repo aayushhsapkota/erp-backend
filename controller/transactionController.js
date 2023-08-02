@@ -532,6 +532,9 @@ export const getTransactions = async (req, res) => {
         {
           billNumber: regexAnything,
         },
+        {
+          note:regexAnything
+        }
       ];
     }
     const oneAndCondition =

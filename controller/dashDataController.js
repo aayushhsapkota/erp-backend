@@ -760,7 +760,104 @@ export const getCashFlowData = async (req, res) => {
     });
   }
 }
+export const getPurchaseData = async (req, res) => {
+  console.log("reached");
+  const { timeRange } = req.query;
 
+  if(!timeRange || !Object.values(TIME_RANGES).includes(timeRange)) {
+      return res.status(400).json({
+          success: false,
+          message: 'Invalid or missing time range provided',
+      });
+  }
+
+  const { startDay, endDay } = getTimeRange(timeRange);
+
+  try {
+      const data = await invoiceModel.aggregate([
+          {
+              $match:{
+                  createdAt: { $gte: startDay, $lte: endDay },
+                  invoiceType: 'Purchase'
+              }
+          },
+          {
+              $group: {
+                  _id: groupByPeriod[timeRange],
+                  totalPurchase: { $sum: '$totalAmount' },
+                  totalMoneyPaid: { $sum: '$paidAmount' }
+              }
+          },
+          {
+              $sort: { _id: 1 } // Sort by the period (day, week, quarter)
+          }
+      ]);
+      //second aggregation pipeline
+      const totalData = await invoiceModel.aggregate([
+        {
+            $match:{
+                createdAt: { $gte: startDay, $lte: endDay },
+                invoiceType: 'Purchase'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalPurchase: { $sum: '$totalAmount' },
+            }
+        }
+    ]);
+
+    // Third Aggregation to calculate total returned amount for invoices of type "SalesReturn"
+    const totalReturnedData = await invoiceModel.aggregate([
+      {
+          $match:{
+              createdAt: { $gte: startDay, $lte: endDay },
+              invoiceType: 'PurchaseReturn'
+          }
+      },
+      {
+          $group: {
+              _id: null,
+              totalReturned: { $sum: '$totalAmount' },
+          }
+      }
+  ]);
+
+        // Create a default array for all weeks
+        let result = Array.from({ length: LENGTHS[timeRange] }, (_, i) => ({
+          _id: i + 1,
+          totalPurchase: 0,
+          totalMoneyPaid: 0
+        }));
+
+        
+      if (data.length !==0) {
+           // Update the result array with actual data
+           for(let item of data) {
+            const periodIndex = item._id - 1;
+            result[periodIndex] = item;
+          }
+
+        };   
+
+      // Send the data
+      return res.status(200).json({
+          success: true,
+          data:result,
+          totalPurchase: totalData.length?totalData[0].totalPurchase:0,
+          totalReturned: totalReturnedData.length ? totalReturnedData[0].totalReturned : 0
+      });
+
+  } catch (error) {
+      // Catch any error
+      console.error(error);
+      return res.status(500).json({
+          success: false,
+          message: process.env.NODE_ENV === 'development' ? error.message : 'Server error'
+      });
+  }
+}
 
 
 
