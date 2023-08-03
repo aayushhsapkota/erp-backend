@@ -5,15 +5,19 @@ import productModel from "../models/productModel.js";
 import { getPaginatedData } from "../Utils/pagination.js";
 import pkg from "jsonwebtoken";
 const { jwt } = pkg;
+import NepaliDate from 'nepali-date-converter';
+
 
 export const createTransaction = async (req) => {
+  const nepaliDate= new NepaliDate();
+  const formattedDate = nepaliDate.format('YYYY-MM-DD');
   const {
     transactionNumber,
     transactionType,
     partyDetails,
     productDetails,
     receviedAmount,
-    createdDate,
+    // createdDate,
     status,
     amount,   
     note,
@@ -156,7 +160,7 @@ export const createTransaction = async (req) => {
     partyDetails,
     productDetails: newProductDetails,
     receviedAmount,
-    createdDate: createdDate ? createdDate : Date.now(),
+    createdDate: formattedDate,
     status,
     amount,
     note,

@@ -78,7 +78,7 @@ export const createproductPage = async (req, res) => {
     lowQuantityAlert,
     sold,
     remarks,
-    createdDate,
+    // createdDate,
   } = req.body;
   try {
     if (!title) {
@@ -145,7 +145,7 @@ export const createproductPage = async (req, res) => {
         },
       ],
       note: savedproductPage.remarks,
-      createdDate: createdDate,
+      // createdDate: createdDate,
     };
     await createTransaction(transaction);
     res.status(200).json({
