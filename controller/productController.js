@@ -91,11 +91,11 @@ export const createproductPage = async (req, res) => {
         message: "Please provide a price",
       });
     }
-    if (!primaryUnit) {
-      return res.status(400).json({
-        message: "Please provide a primary unit",
-      });
-    }
+    // if (!primaryUnit) {
+    //   return res.status(400).json({
+    //     message: "Please provide a primary unit",
+    //   });
+    // }
     if (purchasePrice === undefined || purchasePrice === null) {
       purchasePrice = 0;
     }
