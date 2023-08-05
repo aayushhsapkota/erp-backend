@@ -1,5 +1,5 @@
 import express from "express";
-import { getRevenueData, getExpenseData, getRevenueByCategory,getStockData, getFinancialData, getCashFlowData, getPurchaseData } from "../controller/dashDataController.js";
+import { getRevenueData, getExpenseData, getRevenueByCategory,getStockData, getFinancialData, getCashFlowData, getPurchaseData,getDayBookData } from "../controller/dashDataController.js";
 import {auth, checkAdmin} from "../middleware/auth.js";
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.get("/revenueByCategory",auth,checkAdmin, getRevenueByCategory);
 router.get("/stockData",auth,checkAdmin, getStockData);
 router.get("/financialData",auth,checkAdmin,getFinancialData);
 router.get("/cashFlowData", auth,checkAdmin,getCashFlowData);
+router.get("/dayBookData", auth,checkAdmin,getDayBookData);
 
 
 

@@ -128,6 +128,11 @@ const getTimeRange = (timeRange, now = new Date()) => {
     return { startDay, endDay };
     
   };
+const startOfDay = new Date();
+startOfDay.setHours(0, 0, 0, 0); //today start time
+
+const endOfDay = new Date();
+endOfDay.setHours(23, 59, 59, 999); //today end time
   
 
 export const getRevenueData = async (req, res) => {
@@ -858,6 +863,126 @@ export const getPurchaseData = async (req, res) => {
       });
   }
 }
+
+export const getDayBookData = async (req, res) => {
+
+  try {
+    const salesToday = await invoiceModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          invoiceType: "Sale",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          sales: { $sum: "$paidAmount" },
+        },
+      },
+     
+    ]);
+
+    const esewaSalesToday = await invoiceModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          invoiceType: "Sale",
+          note:"esewa",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          esewaSales: { $sum: "$paidAmount" },
+        },
+      },
+     
+    ]);
+
+    const cashPurchaseToday = await invoiceModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          invoiceType: "Purchase",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          cashPurchase: { $sum: "$paidAmount" },
+        },
+      },
+     
+    ]);
+
+    const totalExpenseToday = await expenseModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalExpense: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const paymentInToday = await transactionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          transactionType: "PaymentIn",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          paymentIn: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const paymentOutToday = await transactionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          transactionType: "PaymentOut",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          paymentOut: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const salesTodayData= salesToday.length ? salesToday[0].sales:0;
+    const esewaSalesTodayData= esewaSalesToday.length ? esewaSalesToday[0].esewaSales:0;
+
+    
+    // Send the data
+    return res.status(200).json({
+      success: true,
+      cashSalesToday: salesTodayData-esewaSalesTodayData,
+      esewaSalesToday: esewaSalesToday.length ? esewaSalesToday[0].esewaSales : 0,
+      cashPurchaseToday: cashPurchaseToday.length ? cashPurchaseToday[0].cashPurchase : 0,
+      totalExpenseToday: totalExpenseToday.length ? totalExpenseToday[0].totalExpense : 0,
+      paymentInToday: paymentInToday.length ? paymentInToday[0].paymentIn : 0,
+      paymentOutToday: paymentOutToday.length ? paymentOutToday[0].paymentOut : 0,     
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        process.env.NODE_ENV === "development" ? error.message : "Server error",
+    });
+  }
+};
+
 
 
 
