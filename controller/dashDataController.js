@@ -133,10 +133,11 @@ startOfDay.setHours(0, 0, 0, 0); //today start time
 
 const endOfDay = new Date();
 endOfDay.setHours(23, 59, 59, 999); //today end time
+
+console.log(startOfDay,endOfDay);
   
 
 export const getRevenueData = async (req, res) => {
-    console.log("reached");
     const { timeRange } = req.query;
   
     if(!timeRange || !Object.values(TIME_RANGES).includes(timeRange)) {
@@ -330,10 +331,27 @@ export const getRevenueByCategory = async (req, res) => {
             _id: "$products.category",
             totalSold: {
               $sum: {
+                // $multiply: [
+                //   { $toDouble: "$products.quantity" },
+                //   { $toDouble: "$products.amount" },
+                // ],
                 $multiply: [
-                  { $toDouble: "$products.quantity" },
-                  { $toDouble: "$products.amount" },
+                  {
+                    $cond: {
+                      if: { $eq: ["$products.quantity", ""] },
+                      then: 0,
+                      else: { $toDouble: "$products.quantity" }
+                    }
+                  },
+                  {
+                    $cond: {
+                      if: { $eq: ["$products.amount", ""] },
+                      then: 0,
+                      else: { $toDouble: "$products.amount" }
+                    }
+                  }
                 ],
+                
               },
             },
           },
@@ -353,10 +371,27 @@ export const getRevenueByCategory = async (req, res) => {
             _id: "$products.category",
             totalReturned: {
               $sum: {
+                // $multiply: [
+                //   { $toDouble: "$products.quantity" },
+                //   { $toDouble: "$products.amount" },
+                // ],
                 $multiply: [
-                  { $toDouble: "$products.quantity" },
-                  { $toDouble: "$products.amount" },
+                  {
+                    $cond: {
+                      if: { $eq: ["$products.quantity", ""] },
+                      then: 0,
+                      else: { $toDouble: "$products.quantity" }
+                    }
+                  },
+                  {
+                    $cond: {
+                      if: { $eq: ["$products.amount", ""] },
+                      then: 0,
+                      else: { $toDouble: "$products.amount" }
+                    }
+                  }
                 ],
+                
               },
             },
           },
@@ -440,7 +475,6 @@ export const getRevenueByCategory = async (req, res) => {
 
 export const getStockData = async (req, res) => {
   try {
-    console.log("reached-stock");
     const data = await productModel.aggregate([
       {
         $group: {
@@ -766,7 +800,6 @@ export const getCashFlowData = async (req, res) => {
   }
 }
 export const getPurchaseData = async (req, res) => {
-  console.log("reached");
   const { timeRange } = req.query;
 
   if(!timeRange || !Object.values(TIME_RANGES).includes(timeRange)) {
