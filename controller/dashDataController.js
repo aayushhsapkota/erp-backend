@@ -128,13 +128,17 @@ const getTimeRange = (timeRange, now = new Date()) => {
     return { startDay, endDay };
     
   };
-const startOfDay = new Date();
-startOfDay.setHours(0, 0, 0, 0); //today start time
 
-const endOfDay = new Date();
-endOfDay.setHours(23, 59, 59, 999); //today end time
+  function getCurrentDayBounds() {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
-console.log(startOfDay,endOfDay);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return { startOfDay, endOfDay };
+}
+
   
 
 export const getRevenueData = async (req, res) => {
@@ -898,6 +902,8 @@ export const getPurchaseData = async (req, res) => {
 }
 
 export const getDayBookData = async (req, res) => {
+  const { startOfDay, endOfDay } = getCurrentDayBounds();
+console.log(startOfDay, endOfDay);
 
   try {
     const salesToday = await invoiceModel.aggregate([
