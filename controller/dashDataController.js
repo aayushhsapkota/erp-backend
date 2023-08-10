@@ -927,7 +927,7 @@ console.log(startOfDay, endOfDay);
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
           invoiceType: "Sale",
-          note:"esewa",
+          note:{ $regex:/^esewa$/i},
         },
       },
       {
