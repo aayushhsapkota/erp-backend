@@ -939,7 +939,7 @@ console.log(startOfDay, endOfDay);
      
     ]);
 
-    const cashPurchaseToday = await invoiceModel.aggregate([
+    const purchaseToday = await invoiceModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
@@ -949,7 +949,7 @@ console.log(startOfDay, endOfDay);
       {
         $group: {
           _id: null,
-          cashPurchase: { $sum: "$paidAmount" },
+          totalPurchase: { $sum: "$paidAmount" },
         },
       },
      
@@ -969,11 +969,12 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentInToday = await transactionModel.aggregate([
+    const paymentInTodayCash = await transactionModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
           transactionType: "PaymentIn",
+          note:"Cash"
         },
       },
       {
@@ -984,11 +985,28 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentOutToday = await transactionModel.aggregate([
+    const paymentInTodayEsewa = await transactionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          transactionType: "PaymentIn",
+          note:"Esewa"
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          paymentIn: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const paymentOutTodayCash = await transactionModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
           transactionType: "PaymentOut",
+          note:"Cash"
         },
       },
       {
@@ -999,6 +1017,23 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
+    const paymentOutTodayEsewa = await transactionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          transactionType: "PaymentOut",
+          note:"Esewa"
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          paymentOut: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+   
     const salesTodayData= salesToday.length ? salesToday[0].sales:0;
     const esewaSalesTodayData= esewaSalesToday.length ? esewaSalesToday[0].esewaSales:0;
 
@@ -1008,10 +1043,13 @@ console.log(startOfDay, endOfDay);
       success: true,
       cashSalesToday: salesTodayData-esewaSalesTodayData,
       esewaSalesToday: esewaSalesToday.length ? esewaSalesToday[0].esewaSales : 0,
-      cashPurchaseToday: cashPurchaseToday.length ? cashPurchaseToday[0].cashPurchase : 0,
+      purchaseToday: purchaseToday.length ? purchaseToday[0].totalPurchase : 0,
       totalExpenseToday: totalExpenseToday.length ? totalExpenseToday[0].totalExpense : 0,
-      paymentInToday: paymentInToday.length ? paymentInToday[0].paymentIn : 0,
-      paymentOutToday: paymentOutToday.length ? paymentOutToday[0].paymentOut : 0,     
+      paymentInTodayCash: paymentInTodayCash.length ? paymentInTodayCash[0].paymentIn : 0,
+      paymentInTodayEsewa: paymentInTodayEsewa.length ? paymentInTodayEsewa[0].paymentIn : 0,
+      paymentOutTodayCash: paymentOutTodayCash.length ? paymentOutTodayCash[0].paymentOut : 0,
+      paymentOutTodayEsewa: paymentOutTodayEsewa.length ? paymentOutTodayEsewa[0].paymentOut : 0,     
+     
     });
   } catch (error) {
     return res.status(500).json({
