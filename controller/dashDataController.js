@@ -3,6 +3,7 @@ import expenseModel from "../models/expenseModel.js";
 import productModel from "../models/productModel.js";
 import clientModel from "../models/clientModel.js";
 import transactionModel from "../models/allTransactionsModel.js";
+import paymentModel from "../models/paymentMethod.js";
 import { response } from "express";
 // import NepaliDate from 'nepali-date-converter';
 
@@ -969,11 +970,11 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentInTodayCash = await transactionModel.aggregate([
+    const paymentInTodayCash = await paymentModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
-          transactionType: "PaymentIn",
+          paymentType: "PaymentIn",
           note:"Cash"
         },
       },
@@ -985,11 +986,11 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentInTodayEsewa = await transactionModel.aggregate([
+    const paymentInTodayEsewa = await paymentModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
-          transactionType: "PaymentIn",
+          paymentType: "PaymentIn",
           note:"Esewa"
         },
       },
@@ -1001,11 +1002,11 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentOutTodayCash = await transactionModel.aggregate([
+    const paymentOutTodayCash = await paymentModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
-          transactionType: "PaymentOut",
+          paymentType: "PaymentOut",
           note:"Cash"
         },
       },
@@ -1017,11 +1018,11 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
-    const paymentOutTodayEsewa = await transactionModel.aggregate([
+    const paymentOutTodayEsewa = await paymentModel.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
-          transactionType: "PaymentOut",
+          paymentType: "PaymentOut",
           note:"Esewa"
         },
       },
@@ -1033,6 +1034,46 @@ console.log(startOfDay, endOfDay);
       },
     ]);
 
+    // const totalCount=await invoiceModel.aggregate([
+    //   {
+    //     $match: {
+    //       createdAt: { $gte: startOfDay, $lte: endOfDay },
+    //       invoiceType: "Sale",
+    //     },
+    //   },
+    //   {
+    //     $group:{
+    //       _id:null,
+    //       totalNumber: { $sum: 1 }
+    //     }
+    //   }
+    // ])
+
+    const salesCounts=await invoiceModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+          invoiceType: "Sale",
+        },
+      },
+      {
+        $group:{
+          _id:"$statusName",
+          totalNumber: { $sum: 1 }
+        }
+      }
+    ])
+
+    const counts = {
+      Paid: 0,
+      Unpaid: 0,
+      Partial: 0
+    };
+
+    salesCounts.forEach(result => {
+      counts[result._id] = result.totalNumber;
+    });
+    
    
     const salesTodayData= salesToday.length ? salesToday[0].sales:0;
     const esewaSalesTodayData= esewaSalesToday.length ? esewaSalesToday[0].esewaSales:0;
@@ -1049,7 +1090,8 @@ console.log(startOfDay, endOfDay);
       paymentInTodayEsewa: paymentInTodayEsewa.length ? paymentInTodayEsewa[0].paymentIn : 0,
       paymentOutTodayCash: paymentOutTodayCash.length ? paymentOutTodayCash[0].paymentOut : 0,
       paymentOutTodayEsewa: paymentOutTodayEsewa.length ? paymentOutTodayEsewa[0].paymentOut : 0,     
-     
+      //  totalCount: totalCount[0] ? totalCount[0].totalNumber : 0,
+       salesCounts: counts,
     });
   } catch (error) {
     return res.status(500).json({
