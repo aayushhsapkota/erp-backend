@@ -779,13 +779,32 @@ export const getCashFlowData = async (req, res) => {
     return acc;
   }, []);
 
- // Fill in missing months
- for (let m = fiveMonthsAgo.getMonth(); m <= now.getMonth(); m++) {
-  const existingMonth = cashFlowData.find(item => item._id === (m+1));
+// Fill in missing months
+ //This code will handle year rollovers
+ let m = initialFiveMonthsAgo.getMonth();
+let y = initialFiveMonthsAgo.getYear();
+let currentMonth = now.getMonth();
+let currentYear = now.getYear();
+
+while (y < currentYear || (y === currentYear && m <= currentMonth)) {
+  const existingMonth = cashFlowData.find(item => item._id === (m + 1));
   if (!existingMonth) {
-    cashFlowData.push({ _id: m+1, cashIn: 0, cashOut: 0 });
+    cashFlowData.push({ _id: m + 1, cashIn: 0, cashOut: 0 });
+  }
+
+  m++;
+  if (m > 11) {
+    m = 0;
+    y++;
   }
 }
+//Fill in missing months
+//  for (let m = initialFiveMonthsAgo.getMonth(); m <= now.getMonth(); m++) {
+//   const existingMonth = cashFlowData.find(item => item._id === (m+1));
+//   if (!existingMonth) {
+//     cashFlowData.push({ _id: m+1, cashIn: 0, cashOut: 0 });
+//   }
+// }
 
   // Sort the array by month
   cashFlowData.sort((a, b) => a._id - b._id);
