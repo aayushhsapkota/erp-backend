@@ -5,7 +5,7 @@ import clientModel from "../models/clientModel.js";
 import transactionModel from "../models/allTransactionsModel.js";
 import paymentModel from "../models/paymentMethod.js";
 import { response } from "express";
-// import NepaliDate from 'nepali-date-converter';
+import NepaliDate from 'nepali-date-converter';
 
 const TIME_RANGES = {
   THIS_WEEK: "thisWeek",
@@ -34,7 +34,7 @@ const groupByPeriod = {
       {
         $floor: {
           $divide: [
-            { $subtract: [{ $dayOfMonth: "$createdAt" }, 1] },
+            { $subtract: ["$dateInfo.day", 1] },
             7
           ]
         }
@@ -47,7 +47,7 @@ const groupByPeriod = {
       {
         $floor: {
           $divide: [
-            { $subtract: [{ $dayOfMonth: "$createdAt" }, 1] },
+            { $subtract: ["$dateInfo.day", 1] },
             7
           ]
         }
@@ -61,7 +61,7 @@ const groupByPeriod = {
       {
         $floor: {
           $divide: [
-            { $subtract: [{ $month: "$createdAt" }, 1] },
+            { $subtract: ["$dateInfo.month", 1] },
             3
           ]
         }
@@ -75,7 +75,7 @@ const groupByPeriod = {
       {
         $floor: {
           $divide: [
-            { $subtract: [{ $month: "$createdAt" }, 1] },
+            { $subtract: ["$dateInfo.month", 1] },
             3
           ]
         }
@@ -84,35 +84,45 @@ const groupByPeriod = {
   }
 };
 
-const getTimeRange = (timeRange, now = new Date()) => {
+const getTimeRange = (timeRange, now = new NepaliDate()) => {
     // Define startDay and endDay here
-    let startDay = new Date(now);
-    let endDay = new Date(now);
+    let startDayNepali = new NepaliDate();
+    let endDayNepali = new NepaliDate();
   
     switch (timeRange) {
       case "thisWeek":
-        startDay.setDate(now.getDate() - now.getDay());
-        endDay.setDate(now.getDate() - now.getDay() + 6);
+        startDayNepali.setDate(now.getDate() - now.getDay());
+        endDayNepali.setDate(now.getDate() - now.getDay() + 6);
         break;
       case "lastWeek":
-        startDay.setDate(now.getDate() - now.getDay() - 7);
-        endDay.setDate(now.getDate() - now.getDay() - 1);
+        startDayNepali.setDate(now.getDate() - now.getDay() - 7);
+        endDayNepali.setDate(now.getDate() - now.getDay() - 1);
         break;
       case "thisMonth":
-        startDay.setDate(1);
-        endDay.setMonth(now.getMonth() + 1, 0);
+        startDayNepali.setDate(1);
+        endDayNepali.setMonth(now.getMonth() + 1);
+        endDayNepali.setDate(0);
         break;
       case "lastMonth":
-        startDay.setMonth(now.getMonth() - 1, 1);
-        endDay.setDate(0);
+        startDayNepali.setMonth(now.getMonth() - 1);
+        startDayNepali.setDate(1);
+        endDayNepali.setDate(0);
         break;
       case "thisYear":
-        startDay.setMonth(0, 1);
-        endDay.setMonth(11, 31);
+        startDayNepali.setMonth(0);
+        startDayNepali.setDate(1);
+        endDayNepali.setMonth(11);
+        endDayNepali.setDate(30);
         break;
       case "lastYear":
-        startDay.setFullYear(now.getFullYear() - 1, 0, 1);
-        endDay.setFullYear(now.getFullYear() - 1, 11, 31);
+        startDayNepali.setYear(now.getYear() - 1);
+        startDayNepali.setMonth(0);
+        startDayNepali.setDate(1);
+
+          endDayNepali.setYear(now.getYear() - 1);
+          endDayNepali.setMonth(11);
+          endDayNepali.setDate(30);
+
         break;
       default:
         return res.status(400).json({
@@ -120,11 +130,13 @@ const getTimeRange = (timeRange, now = new Date()) => {
           message: `Invalid time range provided: ${timeRange}`,
         });
     }
+
+    const startDay=new Date(startDayNepali.toJsDate());
+const endDay=new Date(endDayNepali.toJsDate());
+
     startDay.setHours(0, 0, 0, 0);
     endDay.setHours(23, 59, 59, 999);
 
-    // startDay= new NepaliDate(new Date(startDay)).format('YYYY-MM-DD');
-    // endDay= new NepaliDate(new Date(endDay)).format('YYYY-MM-DD');
 
     return { startDay, endDay };
     
@@ -671,8 +683,9 @@ const merchantOpenings=merchantOpeningBalance[0]?.totalOpenings||0;
 
 export const getCashFlowData = async (req, res) => {
   try {
-    const now = new Date();
-    const fiveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 4, 1);
+    const now = new NepaliDate();
+    const initialFiveMonthsAgo= new NepaliDate(now.getYear(),now.getMonth()-4,1);
+    const fiveMonthsAgo = initialFiveMonthsAgo.toJsDate();
 
     // Aggregate Cash In from transactions
     const cashInData = await transactionModel.aggregate([
@@ -684,7 +697,8 @@ export const getCashFlowData = async (req, res) => {
       },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          // _id: { $month: "$createdAt" },
+          _id: "$dateInfo.month",
           cashIn: {
             $sum: {
               $cond: [
@@ -711,7 +725,8 @@ export const getCashFlowData = async (req, res) => {
       },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          // _id: { $month: "$createdAt" },
+          _id: "$dateInfo.month",
           cashOut: {
             $sum: {
               $cond: [
@@ -736,7 +751,8 @@ export const getCashFlowData = async (req, res) => {
       },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          // _id: { $month: "$createdAt" },
+          _id: "$dateInfo.month",
           cashOut: { $sum: '$amount' }
         }
       },
