@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import NepaliDate from "nepali-date-converter";
 
 const ExpenseSchema = mongoose.Schema(
   {
@@ -15,12 +16,30 @@ const ExpenseSchema = mongoose.Schema(
    
     
     remarks: { type: String },
-    createdDate: {type:String}
+    createdDate: {type:String},
+    dateInfo: {
+      year: { type: Number },
+      month: { type: Number },
+      day: { type: Number },
+    },
   },
+  
   {
     timestamps: true,
   }
 );
+
+
+// Middleware to populate dateInfo
+ExpenseSchema.pre('save', function(next) {
+  const nepDate = new NepaliDate();
+  this.dateInfo = {
+    year: nepDate.getYear(),
+    month: nepDate.getMonth()+1,
+    day: nepDate.getDate(),
+  };
+  next();
+});
 
 const Expense = mongoose.model("Expense", ExpenseSchema);
 

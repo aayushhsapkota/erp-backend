@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import NepaliDate from "nepali-date-converter";
 
 const PaymentMethodSchema = mongoose.Schema(
   {
@@ -8,11 +9,27 @@ const PaymentMethodSchema = mongoose.Schema(
     partyDetails: { type: Object },
     amount: { type: Number },
     note: { type: String },
+    dateInfo: {
+      year: { type: Number },
+      month: { type: Number },
+      day: { type: Number },
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Middleware to populate dateInfo
+PaymentMethodSchema.pre('save', function(next) {
+  const nepDate = new NepaliDate();
+  this.dateInfo = {
+    year: nepDate.getYear(),
+    month: nepDate.getMonth()+1,
+    day: nepDate.getDate(),
+  };
+  next();
+});
 
 const PaymentMethod = mongoose.model("PaymentMethod", PaymentMethodSchema);
 
