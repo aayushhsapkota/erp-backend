@@ -488,7 +488,7 @@ export const updateTransaction = async (req) => {
   updatedTransaction.amount = amount;
   updatedTransaction.note = note;
   updatedTransaction.billNumber = billNumber;
-  updatedTransaction.createdDate = createdDate ? createdDate : new Date();
+  updatedTransaction.createdDate = transaction.createdDate;
   try {
     await updatedTransaction.save();
   } catch (error) {

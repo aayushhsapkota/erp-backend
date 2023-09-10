@@ -239,7 +239,8 @@ export const updateClient = async (req, res) => {
     billingAddress,
     image,
     openingBalance,
-    createdDate,
+    // createdDate,
+    clientType
   } = req.body;
   try {
     if (!name) {
@@ -257,7 +258,7 @@ export const updateClient = async (req, res) => {
       billingAddress,
       image,
       openingBalance,
-      createdDate,
+      clientType
     };
     const transaction = {
       transactionNumber: id,
@@ -275,7 +276,7 @@ export const updateClient = async (req, res) => {
       productDetails: [],
       status: clientData.clientType === "Customer" ? "To Receive" : "To Give",
       amount: parseInt(openingBalance),
-      createdDate,
+      // createdDate,
     };
     await updateTransaction(transaction);
     const updatedData = await clientModel.findByIdAndUpdate(id, clientData, {
