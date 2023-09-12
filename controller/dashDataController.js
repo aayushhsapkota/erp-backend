@@ -111,17 +111,18 @@ const getTimeRange = (timeRange, now = new NepaliDate()) => {
       case "thisYear":
         startDayNepali.setMonth(0);
         startDayNepali.setDate(1);
-        endDayNepali.setMonth(11);
-        endDayNepali.setDate(30);
+      
+        endDayNepali.setYear(now.getYear()+1);
+        endDayNepali.setMonth(0);
+        endDayNepali.setDate(0);
         break;
       case "lastYear":
         startDayNepali.setYear(now.getYear() - 1);
         startDayNepali.setMonth(0);
         startDayNepali.setDate(1);
 
-          endDayNepali.setYear(now.getYear() - 1);
-          endDayNepali.setMonth(11);
-          endDayNepali.setDate(30);
+          endDayNepali.setMonth(0);
+          endDayNepali.setDate(0);
 
         break;
       default:
