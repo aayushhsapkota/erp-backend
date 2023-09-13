@@ -723,7 +723,7 @@ export const deleteTransactionByClientID = async (id) => {
   } catch (error) {
     console.log(error);
   }
-}; // kam xaina
+}; 
 
 export const deleteTransactionOfPaymentInOrSales = async (id) => {
   try {

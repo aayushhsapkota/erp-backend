@@ -4,6 +4,7 @@ import {
   checkClientTransaction,
   createTransaction,
   updateTransaction,
+  deleteTransactionByClientID
 } from "./transactionController.js";
 
 export const getAllClient = async (req, res) => {
@@ -121,6 +122,7 @@ export const createClient = async (req, res) => {
     }
 
       var finalName = capitalFirstName + " " + capitalMiddleName+ " "+ capitalLastName;
+      finalName=finalName.trim();
     
 
     //if exactly that name exists with the same case, 2 is added behind that,
@@ -250,7 +252,7 @@ export const updateClient = async (req, res) => {
       openingBalance = 0;
     }
     const clientData = {
-      name,
+      name:name.trim(),
       email,
       mobileNo,
       secmobileNo,
@@ -294,14 +296,12 @@ export const deleteClient = async (req, res) => {
   const { id } = req.params;
   const { merchant } = req.query;
   try {
-    // await deleteTransactionByClientID(id);
-    // await deletePaymentMethodByClientID(id);
-    // await deleteinvoiceByClientID(id);
     const { status, message } = await checkClientTransaction(id, merchant);
     if (status === 400) {
       return res.status(400).json({ message });
     } else {
       await clientModel.findByIdAndDelete(id);
+      await deleteTransactionByClientID(id);
       res.status(200).json({ message: message });
     }
   } catch (error) {
