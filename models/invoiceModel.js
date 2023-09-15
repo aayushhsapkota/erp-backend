@@ -15,6 +15,7 @@ const InvoiceSchema = mongoose.Schema(
     clientDetail: { type: Object },
     products: { type: Array },
     taxes: { type: Array },
+    discount:{type:Object},
     companyDetail: { type: Object },
     note: { type: String },
     dateInfo: {

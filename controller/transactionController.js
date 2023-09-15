@@ -769,7 +769,7 @@ export const deleteTransactionOfPaymentInOrSales = async (id) => {
       if (method === "PaymentIn") {
         client.totalAmountToPay += transaction.amount;
       } else if (method === "PaymentOut") {
-        client.totalAmountToPay -= transaction.amount;
+        client.totalAmountToPay += transaction.amount;
       } else if (method === "Sale" || method === "Purchase") {
         client.totalAmountToPay -= transaction.amount;
         client.totalAmountToPay += transaction.receviedAmount;

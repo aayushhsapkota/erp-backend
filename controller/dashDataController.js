@@ -349,10 +349,6 @@ export const getRevenueByCategory = async (req, res) => {
             _id: "$products.category",
             totalSold: {
               $sum: {
-                // $multiply: [
-                //   { $toDouble: "$products.quantity" },
-                //   { $toDouble: "$products.amount" },
-                // ],
                 $multiply: [
                   {
                     $cond: {
@@ -1138,8 +1134,89 @@ console.log(startOfDay, endOfDay);
   }
 };
 
+export const calculateMonthlyProfit = async (req, res) => {
 
+  const { startDay, endDay } = getTimeRange("thisMonth");
 
+  try{
+  // Aggregation pipeline
+  const pipeline = [
+    {
+      $match: {
+        createdAt: {
+          $gte: startDay,
+          $lte: endDay,
+        },
+      },
+    },
+    {
+      $unwind: '$products',
+    },
+    {
+      $project: {
+        adjustedSoldPrice: {
+          $cond: [
+            { $ifNull: ['$discount.percent', false] },
+            {
+              $multiply: [
+                '$products.amount',
+                { $subtract: [1, { $divide: ['$discount.percent', 100] }] },
+              ],
+            },
+            '$products.amount',
+          ],
+        },
+        purchasePrice: '$products.purchasePrice', //i tried the value of these variables inside $group stage instead but it did not work. 
+        quantity: '$products.quantity',
+        discountAmount: '$discount.amount',
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        totalInvoiceProfit: {
+          $sum: {
+            $multiply: [
+              { $subtract: ['$adjustedSoldPrice', '$purchasePrice'] },
+              '$quantity',
+            ],
+          },
+        },
+        discountAmount: { $first: '$discountAmount' },
+      },
+    },
+    {
+      $project: {
+        adjustedInvoiceProfit: {
+          $cond: [
+            { $ifNull: ['$discountAmount', false] },
+            { $subtract: ['$totalInvoiceProfit', '$discountAmount'] },
+            '$totalInvoiceProfit',
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalProfit: { $sum: '$adjustedInvoiceProfit' },
+      },
+    },
+  ];
 
+  // Run aggregation
+  const results = await invoiceModel.aggregate(pipeline);
+
+return res.status(200).json({
+  success: true,
+  profit: results.length ? results[0].totalProfit:0
+});
+} catch (error) {
+return res.status(500).json({
+  success: false,
+  message:
+    process.env.NODE_ENV === "development" ? error.message : "Server error",
+});
+}}
 
 
