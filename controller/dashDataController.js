@@ -1206,10 +1206,30 @@ export const calculateMonthlyProfit = async (req, res) => {
 
   // Run aggregation
   const results = await invoiceModel.aggregate(pipeline);
+  const grossProfit= results.length ? results[0].totalProfit:0
+
+  const totalExpenseData = await expenseModel.aggregate([
+    {
+        $match:{
+            createdAt: { $gte: startDay, $lte: endDay },
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            totalExpense: { $sum: '$amount' },
+        }
+    }
+]);
+
+const expense=totalExpenseData.length? totalExpenseData[0].totalExpense:0
+const netProfit=grossProfit-expense;
+
+
 
 return res.status(200).json({
   success: true,
-  profit: results.length ? results[0].totalProfit:0
+  netProfit
 });
 } catch (error) {
 return res.status(500).json({
