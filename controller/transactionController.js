@@ -611,7 +611,7 @@ export const getTransactionsByUserAndReport = async (req, res) => {
     }
     const { data, pageCount } = await getPaginatedData({
       page: pageNumber,
-      // limit: 100,
+      limit: 100000000000000, //removing limit created problems that's why
       modelName: Transaction,
       inside: OrCondition,
       oneAndCondition,
@@ -632,7 +632,7 @@ export const getTransactionByUser = async (req, res) => {
     const page = parseInt(req.query.page);
     const { data, pageCount } = await getPaginatedData({
       page: page,
-      // limit: 200,
+      limit: 100000000000, // removing limit created problems that's why
       modelName: Transaction,
       oneAndCondition:[{status:{$ne:'Draft'}}],
       inside: [{ "partyDetails._id": id }],
