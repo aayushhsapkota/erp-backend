@@ -611,7 +611,7 @@ export const getTransactionsByUserAndReport = async (req, res) => {
     }
     const { data, pageCount } = await getPaginatedData({
       page: pageNumber,
-      limit: 100,
+      // limit: 100,
       modelName: Transaction,
       inside: OrCondition,
       oneAndCondition,
