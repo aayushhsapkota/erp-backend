@@ -632,7 +632,7 @@ export const getTransactionByUser = async (req, res) => {
     const page = parseInt(req.query.page);
     const { data, pageCount } = await getPaginatedData({
       page: page,
-      limit: 200,
+      // limit: 200,
       modelName: Transaction,
       oneAndCondition:[{status:{$ne:'Draft'}}],
       inside: [{ "partyDetails._id": id }],
