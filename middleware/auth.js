@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
-const signatureKey="mySecretKey";
+// const signatureKey="mySecretKey";
+const signatureKey = process.env.signatureKey;
 
 const auth = async (req, res, next) => {
   try {
@@ -26,4 +27,4 @@ const checkAdmin = (req, res, next) => {
 };
 
 
-export { auth, checkAdmin};
+export { auth, checkAdmin, signatureKey };

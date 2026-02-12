@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 
 import userModel from "../models/userModel.js";
 
-const signatureKey = "mySecretKey";
+// const signatureKey = "mySecretKey";
+import { signatureKey } from "../middleware/auth.js";
+
 
 export const signin = async (req, res) => {
 
