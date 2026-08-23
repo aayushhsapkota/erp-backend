@@ -47,8 +47,8 @@ export const updatedPayment = async (req, res) => {
     note: payment.note,
     createdDate: payment.paymentDate,
   };
-  await updateTransaction(transaction);
   try {
+    await updateTransaction(transaction);
     const updatedPayment = await PaymentMethod.findById(id);
     // update the payment
     updatedPayment.amount = payment.amount;

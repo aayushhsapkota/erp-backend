@@ -151,7 +151,7 @@ export const createproductPage = async (req, res) => {
       message: `${savedproductPage.title} created successfully`,
     });
   } catch (error) {
-    res.json({
+    res.status(400).json({
       message: error.message,
     });
   }
@@ -180,7 +180,7 @@ export const addOrReduceProductQuantity = async (req, res) => {
         createdDate: stockDate,
         note: note,
       };
-      createTransaction(transaction);
+      await createTransaction(transaction);
       res.status(200).json({
         data: updatedProduct,
         message: `${updatedProduct.title} stock ${
@@ -206,7 +206,7 @@ export const addOrReduceProductQuantity = async (req, res) => {
         createdDate: stockDate,
         note: note,
       };
-      createTransaction(transaction);
+      await createTransaction(transaction);
       res.status(200).json({
         data: updatedProduct,
         message: `${updatedProduct.title} stock ${
@@ -240,7 +240,7 @@ export const createMultipleProduct = async (req, res) => {
 
   try {
     const savedMultipleProduct = await productModel.insertMany(ArrayOfProduct);
-    savedMultipleProduct.forEach(async (product) => {
+    for (const product of savedMultipleProduct) {
       const transaction = {
         transactionNumber: product._id.toString(),
         transactionType: "OpeningBalance",
@@ -257,8 +257,15 @@ export const createMultipleProduct = async (req, res) => {
         note: product.remarks,
         createdDate: createdDate,
       };
-      await createTransaction(transaction);
-    });
+      try {
+        await createTransaction(transaction);
+      } catch (error) {
+        console.error(
+          `Bulk product import: opening-stock transaction failed for product ${product._id}:`,
+          error
+        );
+      }
+    }
     res.status(200).json({
       data: savedMultipleProduct,
       message: `${savedMultipleProduct.length} products created successfully`,

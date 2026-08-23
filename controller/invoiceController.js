@@ -122,17 +122,21 @@ export const updateInvoice = async (req, res) => {
     billNumber: invoiceNo,
     createdDate: invoice.createdDate,
   };
-  await updateTransaction(transaction);
-  const updatedInvoice = await invoiceModel.findByIdAndUpdate(
-    id,
-    // { ...invoice, id },
-    { ...invoice},
+  try {
+    await updateTransaction(transaction);
+    const updatedInvoice = await invoiceModel.findByIdAndUpdate(
+      id,
+      // { ...invoice, id },
+      { ...invoice},
 
-    { new: true }
-  );
-  res
-    .status(200)
-    .json({ data: updatedInvoice, message: "Invoice updated successfully." });
+      { new: true }
+    );
+    res
+      .status(200)
+      .json({ data: updatedInvoice, message: "Invoice updated successfully." });
+  } catch (error) {
+    res.status(409).json({ message: error.message });
+  }
 }; // end of updateInvoice
 
 export const deleteInvoice = async (req, res) => {

@@ -167,7 +167,11 @@ export const createTransaction = async (req) => {
   try {
     await newTransaction.save();
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      `Failed to save transaction ${transactionNumber} (${transactionType}):`,
+      error
+    );
+    throw error;
   }
 };
 
@@ -487,7 +491,11 @@ export const updateTransaction = async (req) => {
   try {
     await updatedTransaction.save();
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      `Failed to update transaction ${transactionNumber} (${transactionType}):`,
+      error
+    );
+    throw error;
   }
 };
 

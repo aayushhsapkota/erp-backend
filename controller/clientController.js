@@ -170,7 +170,7 @@ export const createClient = async (req, res) => {
     });
   } catch (error) {
     console.log(error.message);
-    res.json({
+    res.status(400).json({
       message: error.message,
     });
 
@@ -197,7 +197,7 @@ export const createMultipleClient = async (req, res) => {
       client.name = capitalFirstName + " " + capitalLastName;
     });
     const savedMultipleCustomer = await clientModel.insertMany(ArrayOfClient);
-    savedMultipleCustomer.forEach(async (clientData) => {
+    for (const clientData of savedMultipleCustomer) {
       const transaction = {
         transactionNumber: clientData._id,
         transactionType: "OpeningBalance",
@@ -214,8 +214,15 @@ export const createMultipleClient = async (req, res) => {
         amount: clientData.openingBalance,
         createdDate,
       };
-      await createTransaction(transaction);
-    });
+      try {
+        await createTransaction(transaction);
+      } catch (error) {
+        console.error(
+          `Bulk client import: opening-balance transaction failed for client ${clientData._id}:`,
+          error
+        );
+      }
+    }
     res.status(200).json({
       data: savedMultipleCustomer,
       message: `${savedMultipleCustomer.length} clients created successfully`,
