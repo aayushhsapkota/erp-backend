@@ -74,7 +74,6 @@ export const getClientById = async (req, res) => {
 
 export const createClient = async (req, res) => {
   let {
-    image,
     name,
     email,
     billingAddress,
@@ -141,7 +140,6 @@ export const createClient = async (req, res) => {
       billingAddress,
       secmobileNo,
       vatNumber,
-      image,
       openingBalance: parseInt(openingBalance),
       clientType,
       totalAmountToPay: parseInt(openingBalance),
@@ -239,7 +237,6 @@ export const updateClient = async (req, res) => {
     secmobileNo,
     vatNumber,
     billingAddress,
-    image,
     openingBalance,
     // createdDate,
     clientType
@@ -258,7 +255,6 @@ export const updateClient = async (req, res) => {
       secmobileNo,
       vatNumber,
       billingAddress,
-      image,
       openingBalance,
       clientType
     };

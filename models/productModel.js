@@ -8,7 +8,6 @@ const ProductSchema = mongoose.Schema(
       type: String,
     },
     category: { type: String },
-    image: { type: String },
     primaryUnit: { type: String, set: (value) => value.toUpperCase() },
     secondaryUnit: { type: String, set: (value) => value.toUpperCase() },
     conversionRatio: { type: Number },

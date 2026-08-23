@@ -9,7 +9,6 @@ const clientSchema = mongoose.Schema(
       type: String,
       default: "N/A",
     },
-    image: { type: String },
     mobileNo: { type: String },
     secmobileNo: { type: String, default: "N/A" },
     vatNumber: { type: String, default: "N/A" },

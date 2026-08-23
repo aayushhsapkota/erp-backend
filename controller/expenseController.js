@@ -71,7 +71,7 @@ export const createExpense = async (req, res) => {
   const nepaliDate= new NepaliDate();
   const formattedDate = nepaliDate.format('YYYY-MM-DD');
  
-  const { title, image, category, amount, remarks} = req.body;
+  const { title, category, amount, remarks} = req.body;
  
   try {
     if (!title) {
@@ -87,7 +87,6 @@ export const createExpense = async (req, res) => {
     const titleCapital = title.charAt(0).toUpperCase() + title.slice(1);
     const expenseData = new expenseModel({
       title:titleCapital,
-      image,
       category,
       amount,
       remarks,
@@ -113,7 +112,7 @@ export const createExpense = async (req, res) => {
 
 export const updateExpenseById = async (req, res) => {
   const { id } = req.params;
-  const { title, image, category, amount, remarks } = req.body;
+  const { title, category, amount, remarks } = req.body;
   try {
     if (!title) {
       return res.status(400).json({
@@ -129,7 +128,6 @@ export const updateExpenseById = async (req, res) => {
       id,
       {
         title,
-        image,
         category,
         amount,
         remarks,
