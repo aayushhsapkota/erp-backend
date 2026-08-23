@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 // import bodyParser from "body-parser";
 import morgan from "morgan";
 import cors from "cors";
@@ -17,7 +17,6 @@ import UserRoute from "./routes/userRoute.js";
 const app = express();
 app.use(cors());
 
-dotenv.config();
 // app.use(bodyParser.json({ limit: "30mb", extended: true }));
 // app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(express.json({ limit: "30mb", extended: true }));
