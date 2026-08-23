@@ -15,7 +15,6 @@ const ExpenseSchema = mongoose.Schema(
    
     
     remarks: { type: String },
-    createdDate: {type:String},
     dateInfo: {
       year: { type: Number },
       month: { type: Number },
