@@ -6,6 +6,7 @@ import transactionModel from "../models/allTransactionsModel.js";
 import paymentModel from "../models/paymentMethod.js";
 import { response } from "express";
 import NepaliDate from 'nepali-date-converter';
+import { nepaliTodayUtcBounds } from "../Utils/nepaliDateRange.js";
 
 const TIME_RANGES = {
   THIS_WEEK: "thisWeek",
@@ -143,17 +144,6 @@ const endDay=new Date(endDayNepali.toJsDate());
     
   };
 
-  function getCurrentDayBounds() {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return { startOfDay, endOfDay };
-}
-
-  
 
 export const getRevenueData = async (req, res) => {
     const { timeRange } = req.query;
@@ -935,7 +925,7 @@ export const getPurchaseData = async (req, res) => {
 }
 
 export const getDayBookData = async (req, res) => {
-  const { startOfDay, endOfDay } = getCurrentDayBounds();
+  const { startOfDay, endOfDay } = nepaliTodayUtcBounds();
 console.log(startOfDay, endOfDay);
 
   try {

@@ -23,3 +23,18 @@ export const nepaliDateToUtcEnd = (bsDateString) => {
   const { year, month, date } = bsStringToAdParts(bsDateString);
   return new Date(Date.UTC(year, month, date + 1) - NEPAL_OFFSET_MS - 1);
 };
+
+// { startOfDay, endOfDay } UTC instants bracketing "today" in Nepal time, computed
+// straight from the current UTC instant (no BS conversion, no dependency on the
+// server process's configured timezone).
+export const nepaliTodayUtcBounds = () => {
+  const nowUtc = Date.now();
+  const nepaliLocal = new Date(nowUtc + NEPAL_OFFSET_MS);
+  const year = nepaliLocal.getUTCFullYear();
+  const month = nepaliLocal.getUTCMonth();
+  const date = nepaliLocal.getUTCDate();
+  return {
+    startOfDay: new Date(Date.UTC(year, month, date) - NEPAL_OFFSET_MS),
+    endOfDay: new Date(Date.UTC(year, month, date + 1) - NEPAL_OFFSET_MS - 1),
+  };
+};
