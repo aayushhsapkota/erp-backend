@@ -2,6 +2,7 @@
 node_modules
 dist
 .dockerignore
-package-lock.json
 .gitignore
 Dockerfile
+.env
+.git
