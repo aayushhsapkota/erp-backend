@@ -12,6 +12,7 @@ import Transactions from "./routes/transactionsRoute.js";
 import ExpenseRoute from "./routes/expenseRoute.js";
 import DashDataRoute from "./routes/dashDataRoute.js";
 import UserRoute from "./routes/userRoute.js";
+import CompanyRoute from "./routes/companyRoute.js";
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/API/transactions", Transactions);
 app.use("/API/expenses", ExpenseRoute);
 app.use("/API/dashData", DashDataRoute);
 app.use("/API/users", UserRoute);
+app.use("/API/company", CompanyRoute);
 
 
 // Route();
