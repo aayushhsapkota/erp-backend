@@ -20,7 +20,6 @@ export const updateCompany = async (req, res) => {
     companyEmail,
     companyPhone,
     companyMobile,
-    image,
   } = req.body;
 
   try {
@@ -32,7 +31,6 @@ export const updateCompany = async (req, res) => {
         companyEmail,
         companyPhone,
         companyMobile,
-        image,
       },
       { new: true, upsert: true, runValidators: true }
     );

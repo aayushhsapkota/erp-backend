@@ -7,7 +7,6 @@ const companySchema = mongoose.Schema(
     companyEmail: { type: String, default: "" },
     companyPhone: { type: String, default: "" },
     companyMobile: { type: String, default: "" },
-    image: { type: String, default: "" },
   },
   {
     timestamps: true,
