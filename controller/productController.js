@@ -77,7 +77,6 @@ export const createproductPage = async (req, res) => {
     lowQuantityAlert,
     sold,
     remarks,
-    // createdDate,
   } = req.body;
   try {
     if (!title) {
@@ -143,7 +142,6 @@ export const createproductPage = async (req, res) => {
         },
       ],
       note: savedproductPage.remarks,
-      // createdDate: createdDate,
     };
     await createTransaction(transaction);
     res.status(200).json({
@@ -220,7 +218,7 @@ export const addOrReduceProductQuantity = async (req, res) => {
 };
 
 export const createMultipleProduct = async (req, res) => {
-  const { products: ArrayOfProduct, createdDate } = req.body;
+  const { products: ArrayOfProduct } = req.body;
   const lastItemCode = await productModel.find().sort({ itemCode: -1 }); //The varible name doesnot seem to be convenient
   let lastItemCodeNumber;
   if (lastItemCode.length > 0) {
@@ -253,7 +251,6 @@ export const createMultipleProduct = async (req, res) => {
           },
         ],
         note: product.remarks,
-        createdDate: createdDate,
       };
       try {
         await createTransaction(transaction);

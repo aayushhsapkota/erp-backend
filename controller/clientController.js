@@ -82,7 +82,6 @@ export const createClient = async (req, res) => {
     vatNumber,
     openingBalance,
     clientType,
-    createdDate,
   } = req.body;
   try {
     if (!name) {
@@ -160,7 +159,6 @@ export const createClient = async (req, res) => {
       productDetails: [],
       status: clientData.clientType === "Customer" ? "To Receive" : "To Give",
       amount: clientData.totalAmountToPay,
-      createdDate,
     };
     await createTransaction(transaction);
     const savedData = await clientData.save();
@@ -178,7 +176,7 @@ export const createClient = async (req, res) => {
 };
 
 export const createMultipleClient = async (req, res) => {
-  const { AddClientData: ArrayOfClient, createdDate } = req.body;
+  const { AddClientData: ArrayOfClient } = req.body;
   try {
     ArrayOfClient.forEach((client) => {
       if (!client.openingBalance) {
@@ -212,7 +210,6 @@ export const createMultipleClient = async (req, res) => {
         productDetails: [],
         status: clientData.clientType === "Customer" ? "To Receive" : "To Give",
         amount: clientData.openingBalance,
-        createdDate,
       };
       try {
         await createTransaction(transaction);
@@ -245,7 +242,6 @@ export const updateClient = async (req, res) => {
     vatNumber,
     billingAddress,
     openingBalance,
-    // createdDate,
     clientType
   } = req.body;
   try {
@@ -281,7 +277,6 @@ export const updateClient = async (req, res) => {
       productDetails: [],
       status: clientData.clientType === "Customer" ? "To Receive" : "To Give",
       amount: parseInt(openingBalance),
-      // createdDate,
     };
     await updateTransaction(transaction);
     const updatedData = await clientModel.findByIdAndUpdate(id, clientData, {

@@ -15,7 +15,6 @@ export const createTransaction = async (req) => {
     partyDetails,
     productDetails,
     receviedAmount,
-    // createdDate,
     status,
     amount,   
     note,
