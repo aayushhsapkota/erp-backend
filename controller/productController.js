@@ -158,7 +158,7 @@ export const createproductPage = async (req, res) => {
 };
 
 export const addOrReduceProductQuantity = async (req, res) => {
-  const { quantity, isAdd, note, stockDate, isSecondaryUnitChecked } = req.body;
+  const { quantity, isAdd, note, isSecondaryUnitChecked } = req.body;
   const { id } = req.params;
   try {
     if (isAdd) {
@@ -177,7 +177,6 @@ export const addOrReduceProductQuantity = async (req, res) => {
             secondaryUnit: updatedProduct.secondaryUnit,
           },
         ],
-        createdDate: stockDate,
         note: note,
       };
       await createTransaction(transaction);
@@ -203,7 +202,6 @@ export const addOrReduceProductQuantity = async (req, res) => {
             secondaryUnit: updatedProduct.secondaryUnit,
           },
         ],
-        createdDate: stockDate,
         note: note,
       };
       await createTransaction(transaction);

@@ -21,7 +21,6 @@ export const createPayment = async (req, res) => {
     productDetails: null,
     amount: newPayment.amount,
     note: newPayment.note,
-    createdDate: newPayment.paymentDate,
   };
   try {
     await createTransaction(transaction);
@@ -45,15 +44,13 @@ export const updatedPayment = async (req, res) => {
     productDetails: null,
     amount: payment.amount,
     note: payment.note,
-    createdDate: payment.paymentDate,
   };
   try {
     await updateTransaction(transaction);
     const updatedPayment = await PaymentMethod.findById(id);
-    // update the payment
+    // update the payment (paymentDate is set once at creation and left alone here)
     updatedPayment.amount = payment.amount;
     updatedPayment.note = payment.note;
-    updatedPayment.paymentDate = payment.paymentDate || new Date();
     // save the payment
     await updatedPayment.save();
     res.status(200).json({ data: updatedPayment });
