@@ -24,7 +24,6 @@ export const getInvoices = async (req, res) => {
         totalAmount,
         paidAmount,
         dueDate,
-        createdDate,
         clientDetail,
       } = item;
       return {
@@ -35,7 +34,6 @@ export const getInvoices = async (req, res) => {
         totalAmount,
         paidAmount,
         dueDate,
-        createdDate,
         clientName: clientDetail?.name,
       };
     });
@@ -91,7 +89,6 @@ export const createInvoice = async (req, res) => {
       amount: newInvoice.totalAmount,
       note: newInvoice.note,
       billNumber: invoiceNo,
-      createdDate: invoice.createdDate,
     };
     await createTransaction(transaction);
     await newInvoice.save();
@@ -120,7 +117,6 @@ export const updateInvoice = async (req, res) => {
     receviedAmount: receviedAmount,
     note: invoice.note,
     billNumber: invoiceNo,
-    createdDate: invoice.createdDate,
   };
   try {
     await updateTransaction(transaction);
