@@ -2,7 +2,7 @@
 
 A Node.js/Express REST API backed by MongoDB, powering the Quartz ERP small-business system: auth, customer/merchant management, inventory, sales/purchase invoicing (with returns), payments, a unified transactions ledger, expenses, and dashboard analytics.
 
-This is the API for [`ERP-UI`](../ERP-UI), the React frontend that consumes it.
+This is the API for [`ERP-UI`](https://github.com/aayushhsapkota/ERP-UI), the React frontend that consumes it.
 
 
 ## Tech stack
@@ -12,7 +12,6 @@ This is the API for [`ERP-UI`](../ERP-UI), the React frontend that consumes it.
 - **jsonwebtoken** + **bcryptjs** — auth (JWT bearer tokens, hashed passwords)
 - **cors**, **morgan** — middleware
 - **dotenv** — environment config
-- **nodemailer** — email
 - **nepali-date-converter** — Bikram Sambat (Nepali) date handling
 - **nodemon** — dev auto-reload
 
