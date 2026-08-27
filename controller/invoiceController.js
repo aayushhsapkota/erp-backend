@@ -24,7 +24,6 @@ export const getInvoices = async (req, res) => {
         totalAmount,
         paidAmount,
         dueDate,
-        createdDate,
         clientDetail,
       } = item;
       return {
@@ -35,7 +34,6 @@ export const getInvoices = async (req, res) => {
         totalAmount,
         paidAmount,
         dueDate,
-        createdDate,
         clientName: clientDetail?.name,
       };
     });
@@ -91,7 +89,6 @@ export const createInvoice = async (req, res) => {
       amount: newInvoice.totalAmount,
       note: newInvoice.note,
       billNumber: invoiceNo,
-      createdDate: invoice.createdDate,
     };
     await createTransaction(transaction);
     await newInvoice.save();
@@ -120,19 +117,22 @@ export const updateInvoice = async (req, res) => {
     receviedAmount: receviedAmount,
     note: invoice.note,
     billNumber: invoiceNo,
-    createdDate: invoice.createdDate,
   };
-  await updateTransaction(transaction);
-  const updatedInvoice = await invoiceModel.findByIdAndUpdate(
-    id,
-    // { ...invoice, id },
-    { ...invoice},
+  try {
+    await updateTransaction(transaction);
+    const updatedInvoice = await invoiceModel.findByIdAndUpdate(
+      id,
+      // { ...invoice, id },
+      { ...invoice},
 
-    { new: true }
-  );
-  res
-    .status(200)
-    .json({ data: updatedInvoice, message: "Invoice updated successfully." });
+      { new: true }
+    );
+    res
+      .status(200)
+      .json({ data: updatedInvoice, message: "Invoice updated successfully." });
+  } catch (error) {
+    res.status(409).json({ message: error.message });
+  }
 }; // end of updateInvoice
 
 export const deleteInvoice = async (req, res) => {

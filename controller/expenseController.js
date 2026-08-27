@@ -1,6 +1,6 @@
 import expenseModel from "../models/expenseModel.js";
 import { getPaginatedData } from "../Utils/pagination.js";
-import NepaliDate from 'nepali-date-converter';
+import { nepaliDateToUtcStart, nepaliDateToUtcEnd } from "../Utils/nepaliDateRange.js";
 
 export const getExpense = async (req, res) => {
   console.log(req.query);
@@ -48,6 +48,16 @@ export const getExpense = async (req, res) => {
         },
       ];
     }
+    // startDate/endDate arrive as BS ("YYYY-MM-DD") calendar-day picks. Convert
+    // each to its real UTC instant boundary and match against createdAt
+    // (a true UTC timestamp) instead of comparing formatted strings.
+    const oneAndCondition = [];
+    if (startDate) {
+      oneAndCondition.push({ createdAt: { $gte: nepaliDateToUtcStart(startDate) } });
+    }
+    if (endDate) {
+      oneAndCondition.push({ createdAt: { $lte: nepaliDateToUtcEnd(endDate) } });
+    }
     const { data, pageCount } = await getPaginatedData({
       page: page,
       limit: docxLimit,
@@ -56,9 +66,7 @@ export const getExpense = async (req, res) => {
       mainSearch: regexSearch ? { name: "title", value: regexSearch } : "",
 
       filterBy: regexFilter ? { name: "category", value: regexFilter } : "",
-      startDate: startDate,
-      endDate: endDate,
-      oneAndCondition: [],
+      oneAndCondition,
       sortBy: sort,
     });
     res.status(200).json({ data, pageCount });
@@ -68,9 +76,6 @@ export const getExpense = async (req, res) => {
 };
 
 export const createExpense = async (req, res) => {
-  const nepaliDate= new NepaliDate();
-  const formattedDate = nepaliDate.format('YYYY-MM-DD');
- 
   const { title, category, amount, remarks} = req.body;
  
   try {
@@ -90,8 +95,6 @@ export const createExpense = async (req, res) => {
       category,
       amount,
       remarks,
-      createdDate: formattedDate
-    
     });
     
 

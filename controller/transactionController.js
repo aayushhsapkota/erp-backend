@@ -5,19 +5,16 @@ import productModel from "../models/productModel.js";
 import { getPaginatedData } from "../Utils/pagination.js";
 import pkg from "jsonwebtoken";
 const { jwt } = pkg;
-import NepaliDate from 'nepali-date-converter';
+import { nepaliDateToUtcStart, nepaliDateToUtcEnd } from "../Utils/nepaliDateRange.js";
 
 
 export const createTransaction = async (req) => {
-  const nepaliDate= new NepaliDate();
-  const formattedDate = nepaliDate.format('YYYY-MM-DD');
   const {
     transactionNumber,
     transactionType,
     partyDetails,
     productDetails,
     receviedAmount,
-    // createdDate,
     status,
     amount,   
     note,
@@ -160,7 +157,6 @@ export const createTransaction = async (req) => {
     partyDetails,
     productDetails: newProductDetails,
     receviedAmount,
-    createdDate: formattedDate,
     status,
     amount,
     note,
@@ -170,7 +166,11 @@ export const createTransaction = async (req) => {
   try {
     await newTransaction.save();
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      `Failed to save transaction ${transactionNumber} (${transactionType}):`,
+      error
+    );
+    throw error;
   }
 };
 
@@ -181,7 +181,6 @@ export const updateTransaction = async (req) => {
     partyDetails,
     productDetails,
     receviedAmount,
-    createdDate,
     status,
     amount,
     note,
@@ -488,11 +487,14 @@ export const updateTransaction = async (req) => {
   updatedTransaction.amount = amount;
   updatedTransaction.note = note;
   updatedTransaction.billNumber = billNumber;
-  updatedTransaction.createdDate = transaction.createdDate;
   try {
     await updatedTransaction.save();
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      `Failed to update transaction ${transactionNumber} (${transactionType}):`,
+      error
+    );
+    throw error;
   }
 };
 
@@ -558,6 +560,15 @@ export const getTransactions = async (req, res) => {
               transactionType: { $ne: "ReduceQuantity" },
             },
           ];
+    // startDate/endDate arrive as BS ("YYYY-MM-DD") calendar-day picks. Convert
+    // each to its real UTC instant boundary and match against createdAt
+    // (a true UTC timestamp) instead of comparing formatted strings.
+    if (startDate) {
+      oneAndCondition.push({ createdAt: { $gte: nepaliDateToUtcStart(startDate) } });
+    }
+    if (endDate) {
+      oneAndCondition.push({ createdAt: { $lte: nepaliDateToUtcEnd(endDate) } });
+    }
     const { data, pageCount } = await getPaginatedData({
       page: pageNumber,
       limit: 8,
@@ -569,10 +580,6 @@ export const getTransactions = async (req, res) => {
         : "",
       filterBy: filterBy ? { name: "transactionType", value: filterBy } : "",
       sortBy: sort,
-      // startDate: startDate ? new Date(startDate) : "",
-      // endDate: endDate ? new Date(endDate) : "",
-      startDate: startDate,
-      endDate: endDate,
     });
     res.status(200).json({ data, pageCount });
   } catch (error) {
@@ -609,6 +616,12 @@ export const getTransactionsByUserAndReport = async (req, res) => {
         },
       ];
     }
+    if (startDate) {
+      oneAndCondition.push({ createdAt: { $gte: nepaliDateToUtcStart(startDate) } });
+    }
+    if (endDate) {
+      oneAndCondition.push({ createdAt: { $lte: nepaliDateToUtcEnd(endDate) } });
+    }
     const { data, pageCount } = await getPaginatedData({
       page: pageNumber,
       limit: 100000000000000, //removing limit created problems that's why
@@ -616,8 +629,6 @@ export const getTransactionsByUserAndReport = async (req, res) => {
       inside: OrCondition,
       oneAndCondition,
       mainSearch: { name: "partyDetails._id", value: id },
-      startDate: startDate,
-      endDate: endDate,
     });
     res.status(200).json({ data, pageCount });
   } catch (error) {

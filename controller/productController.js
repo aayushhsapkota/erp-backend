@@ -77,7 +77,6 @@ export const createproductPage = async (req, res) => {
     lowQuantityAlert,
     sold,
     remarks,
-    // createdDate,
   } = req.body;
   try {
     if (!title) {
@@ -143,7 +142,6 @@ export const createproductPage = async (req, res) => {
         },
       ],
       note: savedproductPage.remarks,
-      // createdDate: createdDate,
     };
     await createTransaction(transaction);
     res.status(200).json({
@@ -151,14 +149,14 @@ export const createproductPage = async (req, res) => {
       message: `${savedproductPage.title} created successfully`,
     });
   } catch (error) {
-    res.json({
+    res.status(400).json({
       message: error.message,
     });
   }
 };
 
 export const addOrReduceProductQuantity = async (req, res) => {
-  const { quantity, isAdd, note, stockDate, isSecondaryUnitChecked } = req.body;
+  const { quantity, isAdd, note, isSecondaryUnitChecked } = req.body;
   const { id } = req.params;
   try {
     if (isAdd) {
@@ -177,10 +175,9 @@ export const addOrReduceProductQuantity = async (req, res) => {
             secondaryUnit: updatedProduct.secondaryUnit,
           },
         ],
-        createdDate: stockDate,
         note: note,
       };
-      createTransaction(transaction);
+      await createTransaction(transaction);
       res.status(200).json({
         data: updatedProduct,
         message: `${updatedProduct.title} stock ${
@@ -203,10 +200,9 @@ export const addOrReduceProductQuantity = async (req, res) => {
             secondaryUnit: updatedProduct.secondaryUnit,
           },
         ],
-        createdDate: stockDate,
         note: note,
       };
-      createTransaction(transaction);
+      await createTransaction(transaction);
       res.status(200).json({
         data: updatedProduct,
         message: `${updatedProduct.title} stock ${
@@ -222,7 +218,7 @@ export const addOrReduceProductQuantity = async (req, res) => {
 };
 
 export const createMultipleProduct = async (req, res) => {
-  const { products: ArrayOfProduct, createdDate } = req.body;
+  const { products: ArrayOfProduct } = req.body;
   const lastItemCode = await productModel.find().sort({ itemCode: -1 }); //The varible name doesnot seem to be convenient
   let lastItemCodeNumber;
   if (lastItemCode.length > 0) {
@@ -240,7 +236,7 @@ export const createMultipleProduct = async (req, res) => {
 
   try {
     const savedMultipleProduct = await productModel.insertMany(ArrayOfProduct);
-    savedMultipleProduct.forEach(async (product) => {
+    for (const product of savedMultipleProduct) {
       const transaction = {
         transactionNumber: product._id.toString(),
         transactionType: "OpeningBalance",
@@ -255,10 +251,16 @@ export const createMultipleProduct = async (req, res) => {
           },
         ],
         note: product.remarks,
-        createdDate: createdDate,
       };
-      await createTransaction(transaction);
-    });
+      try {
+        await createTransaction(transaction);
+      } catch (error) {
+        console.error(
+          `Bulk product import: opening-stock transaction failed for product ${product._id}:`,
+          error
+        );
+      }
+    }
     res.status(200).json({
       data: savedMultipleProduct,
       message: `${savedMultipleProduct.length} products created successfully`,

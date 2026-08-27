@@ -46,6 +46,7 @@ export const signin = async (req, res) => {
 
     res.status(200).json({token });
   } catch (err) {
+    console.error("signin failed:", err);
     res.status(500).json({ message: "Something went wrong" });
   }
 };

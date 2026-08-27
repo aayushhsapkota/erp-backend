@@ -7,8 +7,6 @@ export const getPaginatedData = async ({
   filterBy = { name: "", value: "" },
   sortBy = { createdAt: -1 },
   oneAndCondition = [],
-  startDate = "",
-  endDate = "",
 }) => {
   try {
     const skip = (page - 1) * limit;
@@ -24,16 +22,6 @@ export const getPaginatedData = async ({
     }
     if (filterBy.name) {
       match[filterBy.name] = filterBy.value;
-    }
-    if (startDate) {
-      match.createdDate = { $gte: startDate };
-    }
-    if (endDate) {
-      if (match.createdDate) {
-        match.createdDate.$lte = endDate;
-      } else {
-        match.createdDate = { $lte: endDate };
-      }
     }
     const [filterValue, total] = await Promise.all([
       modelName.aggregate([

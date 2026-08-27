@@ -13,7 +13,6 @@ const TransactionSchema = mongoose.Schema(
     totalAmountToPay: { type: Number },
     note: { type: String },
     billNumber: { type: String },
-    createdDate: { type: String},
     dateInfo: {
       year: { type: Number },
       month: { type: Number },

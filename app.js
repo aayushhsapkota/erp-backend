@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 // import bodyParser from "body-parser";
 import morgan from "morgan";
 import cors from "cors";
@@ -12,12 +12,12 @@ import Transactions from "./routes/transactionsRoute.js";
 import ExpenseRoute from "./routes/expenseRoute.js";
 import DashDataRoute from "./routes/dashDataRoute.js";
 import UserRoute from "./routes/userRoute.js";
+import CompanyRoute from "./routes/companyRoute.js";
 
 
 const app = express();
 app.use(cors());
 
-dotenv.config();
 // app.use(bodyParser.json({ limit: "30mb", extended: true }));
 // app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -32,6 +32,7 @@ app.use("/API/transactions", Transactions);
 app.use("/API/expenses", ExpenseRoute);
 app.use("/API/dashData", DashDataRoute);
 app.use("/API/users", UserRoute);
+app.use("/API/company", CompanyRoute);
 
 
 // Route();
