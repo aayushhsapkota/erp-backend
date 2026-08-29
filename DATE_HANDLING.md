@@ -10,7 +10,7 @@ So, getting the Nepal time correct does not automatically give you the correct B
 | Problem | Solution |
 |---|---|
 | Making the server use Nepal time | `TZ=Asia/Kathmandu` in `.env` and `Dockerfile` |
-| Converting a normal UTC date into a BS date | `nepali-date-converter` v3.3.1 |
+| Converting a Gregorian date into a BS date — a **calendar** conversion, separate from timezone | `nepali-date-converter` v3.3.1 |
 
 ## Database: `createdAt` is the main date
 
@@ -35,15 +35,13 @@ dateInfo: {
 }
 ```
 
-This is automatically created when a record is saved using a Mongoose `pre('save')` hook and `new NepaliDate()`.
+This is created automatically when a record is saved, through two separate steps:
 
-The important thing is that this depends on:
+1. **Clock step (timezone):** The server asks its clock, "what's the current Gregorian date/time?" — correct only because `TZ=Asia/Kathmandu` is set.
+2. **Calendar step (unrelated to timezone):** That Gregorian moment is run through a **calendar** conversion — `new NepaliDate()` — to produce the Bikram Sambat date.
+3. The BS result is stored as `dateInfo`; dashboard charts group by it.
 
-```
-TZ=Asia/Kathmandu
-```
-
-Without the correct timezone, records saved around midnight could get the wrong BS day.
+Without the correct timezone in step 1, records saved around midnight could get the wrong BS day — even though step 2, the calendar conversion itself, is working correctly.
 
 ### Why do we need `dateInfo`?
 
@@ -88,7 +86,7 @@ They convert the Nepal date/time into the correct UTC range and allow you to que
 }
 ```
 
-This approach is also more reliable if the server's timezone configuration is accidentally wrong.
+This approach is also more reliable.
 
 These helpers are currently used by:
 
