@@ -86,6 +86,10 @@ Utils/                  # Shared helpers (pagination, Nepali date ranges)
 scripts/                # One-off maintenance scripts
 ```
 
+## Date & time handling
+
+See [DATE_HANDLING.md](DATE_HANDLING.md) for how Nepali (Bikram Sambat) dates, UTC storage, and the `TZ` env var fit together — read this before touching anything date-related.
+
 ## Deployment
 
 Currently deployed on Render; the frontend's default API base URL points at that instance. When running locally, point `ERP-UI` at `http://localhost:<PORT>/API/` instead (see the frontend README).
