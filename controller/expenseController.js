@@ -3,11 +3,10 @@ import { getPaginatedData } from "../Utils/pagination.js";
 import { nepaliDateToUtcStart, nepaliDateToUtcEnd } from "../Utils/nepaliDateRange.js";
 
 export const getExpense = async (req, res) => {
-  console.log(req.query);
   try {
     const {
       page,
-      searchBy: { name, anything },
+      searchBy: { name },
       filterBy,
       sortBy,
       limit,
@@ -18,7 +17,6 @@ export const getExpense = async (req, res) => {
 
     let regexSearch = name;
     let regexFilter = filterBy;
-    let regexAnything = anything;
 
     let sort = parseInt(sortBy);
     if (sort === 1) {
@@ -36,18 +34,6 @@ export const getExpense = async (req, res) => {
     if (regexFilter) {
       regexFilter = new RegExp(regexFilter, "i");
     }
-    let OrCondition = [];
-    if (regexAnything) {
-      regexAnything = new RegExp(regexAnything, "i");
-      OrCondition = [
-        {
-          brand: regexAnything,
-        },
-        {
-          itemCode: regexAnything,
-        },
-      ];
-    }
     // startDate/endDate arrive as BS ("YYYY-MM-DD") calendar-day picks. Convert
     // each to its real UTC instant boundary and match against createdAt
     // (a true UTC timestamp) instead of comparing formatted strings.
@@ -62,7 +48,7 @@ export const getExpense = async (req, res) => {
       page: page,
       limit: docxLimit,
       modelName: expenseModel,
-      inside: OrCondition,
+      inside: [],
       mainSearch: regexSearch ? { name: "title", value: regexSearch } : "",
 
       filterBy: regexFilter ? { name: "category", value: regexFilter } : "",
