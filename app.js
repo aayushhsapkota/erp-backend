@@ -33,15 +33,19 @@ app.use("/API/company", CompanyRoute);
 
 // Route();
 const PORT = process.env.PORT || 80;
+
 mongoose
   .connect(process.env.CONNECTION_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("Database connected"))
-  .catch((error) => console.log(`Database ${error.message} did not connect`))
-  .finally(() =>
-    app.listen(PORT, console.log(`Server running on port: ${PORT}`))
-  );
+  .then(() => {
+    console.log("Database connected");
+    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+  })
+  .catch((error) => {
+    console.log(`Database ${error.message} did not connect`);
+    process.exit(1);
+  });
 
 export default app;
