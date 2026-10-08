@@ -24,7 +24,9 @@ const toSafeUser = (user) => {
 const refreshCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production", //In production, the cookie is only sent over HTTPS.
-  sameSite: "none", //"none" because my frontend and backend may be on different sites.
+  //"none" in prod since frontend/backend are cross-site; "lax" in dev so it still works over plain http.
+  // Use "lax" in development because localhost uses HTTP and "none" requires Secure.
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
   path: "/API/users",
 });
 
