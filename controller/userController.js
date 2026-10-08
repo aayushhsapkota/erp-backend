@@ -10,6 +10,16 @@ import {
 
 const REFRESH_COOKIE_NAME = "erp-refresh-token";
 
+// Converts the Mongoose user document into a plain object,
+// removes sensitive fields such as the password and refresh tokens,
+// and returns the remaining user data as a safe object to send to the client.
+const toSafeUser = (user) => {
+  // ...safeUser collects all remaining properties into a new object called safeUser.
+// safeUser does not need to be declared separately because destructuring creates it.
+  const { password, refreshTokens, ...safeUser } = user.toObject();
+  return safeUser;
+};
+
 // Scoped to /API/users so it's only ever sent back on auth endpoints
 const refreshCookieOptions = () => ({
   httpOnly: true,
@@ -121,7 +131,7 @@ export const signup = async (req, res) => {
   //generating and sending back tokens
     const accessToken = await issueTokens(res, result);
 
-    res.status(201).json({ result, token: accessToken });
+    res.status(201).json({ result: toSafeUser(result), token: accessToken });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
 
