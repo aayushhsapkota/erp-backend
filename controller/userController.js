@@ -1,11 +1,48 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 import userModel from "../models/userModel.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  hashToken,
+  getRefreshTokenExpiry,
+} from "../utils/token.js";
 
-// const signatureKey = "mySecretKey";
-import { signatureKey } from "../middleware/auth.js";
+const REFRESH_COOKIE_NAME = "erp-refresh-token";
 
+// Scoped to /API/users so it's only ever sent back on auth endpoints
+const refreshCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", //In production, the cookie is only sent over HTTPS.
+  sameSite: "none", //"none" because my frontend and backend may be on different sites.
+  path: "/API/users",
+});
+
+// Issues a fresh access+refresh pair for `user`, persists the new refresh
+// token's hash on the user document (pruning any expired ones), and sets
+// the refresh cookie on `res`. Returns the access token to send in the body.
+const issueTokens = async (res, user) => {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken();
+  const tokenHash = hashToken(refreshToken);
+  const expiresAt = getRefreshTokenExpiry();
+
+  //This code removes expired refresh tokens from the user's refreshTokens array.
+  user.refreshTokens = (user.refreshTokens || []).filter(
+    (rt) => rt.expiresAt > new Date()
+  );
+  user.refreshTokens.push({ tokenHash, expiresAt });
+  await user.save();
+
+  // Send the refresh token as an httpOnly cookie; the browser stores it
+// automatically and sends it with eligible requests.
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
+    ...refreshCookieOptions(),
+    expires: expiresAt,
+  });
+
+  return accessToken;
+};
 
 export const signin = async (req, res) => {
 
@@ -33,18 +70,10 @@ export const signin = async (req, res) => {
     if (!isPasswordCorrect)
       return res.status(400).json({ message: "Invalid Credentials!!" });
 
-    const token = jwt.sign(
-      {
-        userName: existingUser.userName,
-        id: existingUser._id,
-        isAdmin: existingUser.isAdmin,
-      },
-      signatureKey,
-      { expiresIn: "1h" }
-    );
+    const accessToken = await issueTokens(res, existingUser);
 
-
-    res.status(200).json({token });
+    //no need to send refresh token in response body, it is sent as httpOnly cookie becasue it is confifured like that in the issueTokens function.
+    res.status(200).json({ token: accessToken });
   } catch (err) {
     console.error("signin failed:", err);
     res.status(500).json({ message: "Something went wrong" });
@@ -59,7 +88,7 @@ export const signup = async (req, res) => {
     if (!userName) {
         return res.status(400).json({ message: "Please enter username." });
       }
-  
+
       if (!password) {
         return res.status(400).json({ message: "Please enter password." });
       }
@@ -89,17 +118,75 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       name: `${firstName} ${lastName}`,
     });
-  //generating and sending back token
-    const token = jwt.sign(
-      { userName: result.userName, id: result._id, isAdmin: result.isAdmin },
-      signatureKey,
-      { expiresIn: "1h" }
-    );
+  //generating and sending back tokens
+    const accessToken = await issueTokens(res, result);
 
-    res.status(201).json({ result, token });
+    res.status(201).json({ result, token: accessToken });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
 
     console.log(error);
+  }
+};
+
+// Exchanges the httpOnly refresh cookie for a new access token, rotating the
+// refresh token in the same call. Called silently by the frontend on page load/reload or
+// when the access token expires.
+export const refresh = async (req, res) => {
+  try {
+    //Get the refresh token from the cookie
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Please login to continue." });
+    }
+
+    const tokenHash = hashToken(refreshToken);
+    const user = await userModel.findOne({ "refreshTokens.tokenHash": tokenHash });
+
+    //If no user is found → the token is invalid/revoked → clear the cookie and require login.
+    if (!user) {
+      res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
+      return res.status(401).json({ message: "Please login to continue." });
+    }
+
+    const storedToken = user.refreshTokens.find((rt) => rt.tokenHash === tokenHash);
+    if (!storedToken || storedToken.expiresAt < new Date()) {
+      // If Expired token presented: drop it and
+      // force a real login rather than silently extending the session.
+      user.refreshTokens = user.refreshTokens.filter((rt) => rt.tokenHash !== tokenHash);
+      await user.save();
+      res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
+      return res.status(401).json({ message: "Session expired, please login again." });
+    }
+
+   // Rotate: Remove the old refresh token and issue a new access + refresh token pair.
+    user.refreshTokens = user.refreshTokens.filter((rt) => rt.tokenHash !== tokenHash);
+    const accessToken = await issueTokens(res, user);
+
+    res.status(200).json({ token: accessToken });
+  } catch (error) {
+    console.error("refresh failed:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+// Revokes the refresh token tied to this browser session (this device only -
+// other logged-in devices are unaffected) and clears the cookie.
+export const logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (refreshToken) {
+      const tokenHash = hashToken(refreshToken);
+      //$pull removes the matching token from the refreshTokens array.
+      await userModel.updateOne(
+        { "refreshTokens.tokenHash": tokenHash },
+        { $pull: { refreshTokens: { tokenHash } } }
+      );
+    }
+    res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
+    res.status(200).json({ message: "Logged out" });
+  } catch (error) {
+    console.error("logout failed:", error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };

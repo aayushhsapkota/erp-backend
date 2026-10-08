@@ -1,7 +1,4 @@
-import jwt from "jsonwebtoken";
-
-// const signatureKey="mySecretKey";
-const signatureKey = process.env.signatureKey;
+import { verifyAccessToken } from "../utils/token.js";
 
 const auth = async (req, res, next) => {
   try {
@@ -9,7 +6,7 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: "Login to continue." });
     }
     const token = req.headers.authorization.split(" ")[1];
-    const decodedData = jwt.verify(token, signatureKey);// jwt secret is here
+    const decodedData = verifyAccessToken(token);
     //injects this attributes in request after decoding token
     req.userId = decodedData?.id;
     req.isAdmin = decodedData?.isAdmin;
@@ -27,4 +24,4 @@ const checkAdmin = (req, res, next) => {
 };
 
 
-export { auth, checkAdmin, signatureKey };
+export { auth, checkAdmin };
