@@ -6,7 +6,7 @@ import {
   generateRefreshToken,
   hashToken,
   getRefreshTokenExpiry,
-} from "../utils/token.js";
+} from "../Utils/token.js";
 
 const REFRESH_COOKIE_NAME = "erp-refresh-token";
 

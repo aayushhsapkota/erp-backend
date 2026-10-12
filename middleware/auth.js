@@ -1,4 +1,4 @@
-import { verifyAccessToken } from "../utils/token.js";
+import { verifyAccessToken } from "../Utils/token.js";
 
 const auth = async (req, res, next) => {
   try {
