@@ -32,7 +32,7 @@ const allowedOrigins = (process.env.FRONTEND_URL || "")
   .map((origin) => origin.trim())
   .concat(["http://localhost:5173", "http://localhost:3000"]);
 
-//app.use syntax
+//app.use normal syntax
 // app.use(cors({
 //     origin: allowedOrigins,
 //     credentials: true

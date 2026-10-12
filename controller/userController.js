@@ -144,6 +144,8 @@ export const signup = async (req, res) => {
 // Exchanges the httpOnly refresh cookie for a new access token, rotating the
 // refresh token in the same call. Called silently by the frontend on page load/reload or
 // when the access token expires.
+
+//returns access token in the response body and also a new refresh token in the httpOnly cookie. The old refresh token is removed from the user document.
 export const refresh = async (req, res) => {
   try {
     //Get the refresh token from the cookie
@@ -182,8 +184,8 @@ export const refresh = async (req, res) => {
   }
 };
 
-// Revokes the refresh token tied to this browser session (this device only -
-// other logged-in devices are unaffected) and clears the cookie.
+// Deletes the refresh token from user account and clears the cookie from the browser session (this device only -
+// other logged-in devices are unaffected)
 export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
@@ -195,6 +197,7 @@ export const logout = async (req, res) => {
         { $pull: { refreshTokens: { tokenHash } } }
       );
     }
+    //this sends a response instructing the browser to remove the refresh token cookie
     res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
     res.status(200).json({ message: "Logged out" });
   } catch (error) {
